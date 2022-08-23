@@ -1,0 +1,12 @@
+queue:
+  order:
+    orderCreated:
+      exchange: "orderExchange"
+      exchangeType: "topic"
+      routingKey : "order.created"
+      queue : "orderCreatedQueue"
+    orderUpdated:
+      exchange: "orderExchange"
+      exchangeType: "topic"
+      routingKey: "order.updated"
+      queue: "orderUpdatedQueue"

@@ -1,0 +1,12 @@
+dev:
+  rabbit:
+    host: "localhost"
+    port: 5672
+    virtualHost: "/"
+    connectionName : "go connection"
+    username : "guest"
+    password : "guest"
+  mongo:
+    connectionString : "mongodb://root:155202Asd...@localhost:27017"
+    database :  "NewOrderDb"
+    collection : {"Order" : "NewOrders" , "Product": "NewProducts"}

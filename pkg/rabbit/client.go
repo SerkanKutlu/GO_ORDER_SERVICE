@@ -11,19 +11,19 @@ import (
 )
 
 type Client struct {
-	connection  *amqp.Connection
-	channel     *amqp.Channel
-	queueConfig *config.QueueConfig
+	Connection  *amqp.Connection
+	Channel     *amqp.Channel
+	QueueConfig *config.QueueConfig
 }
 
 func (client *Client) PublishAtCreated(message *events.OrderCreated) error {
-	exchangeName := client.queueConfig.Order.OrderCreated.Exchange
-	routingKey := client.queueConfig.Order.OrderCreated.RoutingKey
+	exchangeName := client.QueueConfig.Order.OrderCreated.Exchange
+	routingKey := client.QueueConfig.Order.OrderCreated.RoutingKey
 	byteBody, err := json.Marshal(message)
 	if err != nil {
 		return err
 	}
-	err = client.channel.PublishWithContext(context.Background(), exchangeName, routingKey, false, false, amqp.Publishing{
+	err = client.Channel.PublishWithContext(context.Background(), exchangeName, routingKey, false, false, amqp.Publishing{
 		ContentType: "text/plain",
 		Body:        byteBody,
 	})
@@ -33,13 +33,13 @@ func (client *Client) PublishAtCreated(message *events.OrderCreated) error {
 	return nil
 }
 func (client *Client) PublishAtUpdated(message *events.OrderUpdated) error {
-	exchangeName := client.queueConfig.Order.OrderUpdated.Exchange
-	routingKey := client.queueConfig.Order.OrderUpdated.RoutingKey
+	exchangeName := client.QueueConfig.Order.OrderUpdated.Exchange
+	routingKey := client.QueueConfig.Order.OrderUpdated.RoutingKey
 	byteBody, err := json.Marshal(message)
 	if err != nil {
 		return err
 	}
-	err = client.channel.PublishWithContext(context.Background(), exchangeName, routingKey, false, false, amqp.Publishing{
+	err = client.Channel.PublishWithContext(context.Background(), exchangeName, routingKey, false, false, amqp.Publishing{
 		ContentType: "text/plain",
 		Body:        byteBody,
 	})
@@ -53,9 +53,9 @@ func NewRabbitClient(rabbitConfig config.RabbitConfig, queueConfig config.QueueC
 	connection := createConnection(rabbitConfig)
 	channel := createChannel(connection)
 	client := &Client{
-		connection:  connection,
-		channel:     channel,
-		queueConfig: &queueConfig,
+		Connection:  connection,
+		Channel:     channel,
+		QueueConfig: &queueConfig,
 	}
 	client.setAllConfigurations()
 	return client
@@ -63,11 +63,11 @@ func NewRabbitClient(rabbitConfig config.RabbitConfig, queueConfig config.QueueC
 
 //Creating channel, declare queues and exchanges, binding.
 func (client *Client) setAllConfigurations() {
-	queues := client.getRegisteredQueues()
+	queues := client.GetRegisteredQueues()
 	for _, queue := range *queues {
-		declareQueue(client.channel, queue)
-		declareExchange(client.channel, queue)
-		bindQueue(client.channel, queue)
+		declareQueue(client.Channel, queue)
+		declareExchange(client.Channel, queue)
+		bindQueue(client.Channel, queue)
 	}
 }
 
@@ -116,7 +116,7 @@ func createConnection(rabbitConfig config.RabbitConfig) *amqp.Connection {
 }
 
 func (client *Client) CloseConnection() {
-	err := client.connection.Close()
+	err := client.Connection.Close()
 	if err != nil {
 		panic("Rabbit mq connection close failed")
 	}

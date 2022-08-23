@@ -49,6 +49,7 @@ func (client *Client) PublishAtUpdated(message *events.OrderUpdated) error {
 	}
 	return nil
 }
+
 func NewRabbitClient(rabbitConfig config.RabbitConfig, queueConfig config.QueueConfig, publisherConfig config.PublisherConfig) *Client {
 	connection := createConnection(rabbitConfig)
 	channel := createChannel(connection)

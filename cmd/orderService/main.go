@@ -12,7 +12,7 @@ func main() {
 
 	env := os.Getenv("GO_ENV")
 
-	confManager := config.NewConfigurationManager(env)
+	confManager := config.NewConfigurationManager("./yml", "application", env)
 
 	///MONGO
 	mongoConfig := confManager.GetMongoConfiguration()

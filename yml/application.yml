@@ -3,10 +3,21 @@ dev:
     host: "localhost"
     port: 5672
     virtualHost: "/"
-    connectionName : "go connection"
+    connectionName : "go publisher"
     username : "guest"
     password : "guest"
   mongo:
     connectionString : "mongodb://root:155202Asd...@localhost:27017"
     database :  "NewOrderDb"
     collection : {"Order" : "NewOrders" , "Product": "NewProducts"}
+  order:
+    orderCreated:
+      exchange: "orderExchange"
+      exchangeType: "topic"
+      routingKey: "order.created"
+      queue: "orderCreatedQueue"
+    orderUpdated:
+      exchange: "orderExchange"
+      exchangeType: "topic"
+      routingKey: "order.updated"
+      queue: "orderUpdatedQueue"

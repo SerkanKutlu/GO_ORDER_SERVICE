@@ -10,12 +10,12 @@ type configurationManager struct {
 	publisherConfig   *PublisherConfig
 }
 
-func NewConfigurationManager(env string) *configurationManager {
-	viper.AddConfigPath("./yml")
+func NewConfigurationManager(path string, file string, env string) *configurationManager {
+	viper.AddConfigPath(path)
 	viper.SetConfigType("yml")
-	appConfig := readApplicationConfigFile(env)
-	queueConfig := readQueuesConfigFile(env)
-	publisherConfig := readPublisherConfigFile(env)
+	appConfig := readApplicationConfigFile(env, file)
+	queueConfig := readQueuesConfigFile(env, file)
+	publisherConfig := readPublisherConfigFile(env, file)
 	return &configurationManager{
 		applicationConfig: appConfig,
 		queuesConfig:      queueConfig,
@@ -39,9 +39,9 @@ func (cm *configurationManager) GetPublisherConfiguration() *PublisherConfig {
 	return cm.publisherConfig
 }
 
-func readApplicationConfigFile(env string) *ApplicationConfig {
+func readApplicationConfigFile(env string, file string) *ApplicationConfig {
 
-	viper.SetConfigName("application")
+	viper.SetConfigName(file)
 	if err := viper.ReadInConfig(); err != nil {
 		panic("Can not load application config file")
 	}
@@ -53,8 +53,8 @@ func readApplicationConfigFile(env string) *ApplicationConfig {
 	return &appConfig
 }
 
-func readQueuesConfigFile(env string) *QueueConfig {
-	viper.SetConfigName("rabbit")
+func readQueuesConfigFile(env string, file string) *QueueConfig {
+	viper.SetConfigName(file)
 	if err := viper.ReadInConfig(); err != nil {
 		panic("Can not load application config file")
 	}
@@ -66,8 +66,8 @@ func readQueuesConfigFile(env string) *QueueConfig {
 	return &queueConfig
 }
 
-func readPublisherConfigFile(env string) *PublisherConfig {
-	viper.SetConfigName("rabbit")
+func readPublisherConfigFile(env string, file string) *PublisherConfig {
+	viper.SetConfigName(file)
 	if err := viper.ReadInConfig(); err != nil {
 		panic("Can not load application config file")
 	}

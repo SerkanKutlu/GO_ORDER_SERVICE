@@ -21,7 +21,7 @@ func GetDataServices(env string) *DataAccessService {
 		return dataAccessService
 	}
 	//RABBIT MQ
-	confManager := config.NewConfigurationManager(env)
+	confManager := config.NewConfigurationManager("./yml", "application", env)
 	rabbitConfig := confManager.GetRabbitConfiguration()
 	queueConfig := confManager.GetQueuesConfiguration()
 	publisherConfig := confManager.GetPublisherConfiguration()

@@ -7,7 +7,6 @@ import (
 type configurationManager struct {
 	applicationConfig *ApplicationConfig
 	queuesConfig      *QueueConfig
-	publisherConfig   *PublisherConfig
 }
 
 func NewConfigurationManager(path string, file string, env string) *configurationManager {
@@ -15,11 +14,9 @@ func NewConfigurationManager(path string, file string, env string) *configuratio
 	viper.SetConfigType("yml")
 	appConfig := readApplicationConfigFile(env, file)
 	queueConfig := readQueuesConfigFile(env, file)
-	publisherConfig := readPublisherConfigFile(env, file)
 	return &configurationManager{
 		applicationConfig: appConfig,
 		queuesConfig:      queueConfig,
-		publisherConfig:   publisherConfig,
 	}
 }
 
@@ -33,10 +30,6 @@ func (cm *configurationManager) GetMongoConfiguration() *MongoConfig {
 
 func (cm *configurationManager) GetQueuesConfiguration() *QueueConfig {
 	return cm.queuesConfig
-}
-
-func (cm *configurationManager) GetPublisherConfiguration() *PublisherConfig {
-	return cm.publisherConfig
 }
 
 func readApplicationConfigFile(env string, file string) *ApplicationConfig {
@@ -64,17 +57,4 @@ func readQueuesConfigFile(env string, file string) *QueueConfig {
 		panic(err.Error())
 	}
 	return &queueConfig
-}
-
-func readPublisherConfigFile(env string, file string) *PublisherConfig {
-	viper.SetConfigName(file)
-	if err := viper.ReadInConfig(); err != nil {
-		panic("Can not load application config file")
-	}
-	var publisherConfig PublisherConfig
-	envSub := viper.Sub(env)
-	if err := envSub.Unmarshal(&publisherConfig); err != nil {
-		panic(err.Error())
-	}
-	return &publisherConfig
 }

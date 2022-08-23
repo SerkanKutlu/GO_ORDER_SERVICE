@@ -11,15 +11,14 @@ import (
 )
 
 type Client struct {
-	connection      *amqp.Connection
-	channel         *amqp.Channel
-	queueConfig     *config.QueueConfig
-	publisherConfig *config.PublisherConfig
+	connection  *amqp.Connection
+	channel     *amqp.Channel
+	queueConfig *config.QueueConfig
 }
 
 func (client *Client) PublishAtCreated(message *events.OrderCreated) error {
-	exchangeName := client.publisherConfig.Order.OrderCreated.Exchange
-	routingKey := client.publisherConfig.Order.OrderCreated.RoutingKey
+	exchangeName := client.queueConfig.Order.OrderCreated.Exchange
+	routingKey := client.queueConfig.Order.OrderCreated.RoutingKey
 	byteBody, err := json.Marshal(message)
 	if err != nil {
 		return err
@@ -34,8 +33,8 @@ func (client *Client) PublishAtCreated(message *events.OrderCreated) error {
 	return nil
 }
 func (client *Client) PublishAtUpdated(message *events.OrderUpdated) error {
-	exchangeName := client.publisherConfig.Order.OrderUpdated.Exchange
-	routingKey := client.publisherConfig.Order.OrderUpdated.RoutingKey
+	exchangeName := client.queueConfig.Order.OrderUpdated.Exchange
+	routingKey := client.queueConfig.Order.OrderUpdated.RoutingKey
 	byteBody, err := json.Marshal(message)
 	if err != nil {
 		return err
@@ -50,14 +49,13 @@ func (client *Client) PublishAtUpdated(message *events.OrderUpdated) error {
 	return nil
 }
 
-func NewRabbitClient(rabbitConfig config.RabbitConfig, queueConfig config.QueueConfig, publisherConfig config.PublisherConfig) *Client {
+func NewRabbitClient(rabbitConfig config.RabbitConfig, queueConfig config.QueueConfig) *Client {
 	connection := createConnection(rabbitConfig)
 	channel := createChannel(connection)
 	client := &Client{
-		connection:      connection,
-		channel:         channel,
-		queueConfig:     &queueConfig,
-		publisherConfig: &publisherConfig,
+		connection:  connection,
+		channel:     channel,
+		queueConfig: &queueConfig,
 	}
 	client.setAllConfigurations()
 	return client

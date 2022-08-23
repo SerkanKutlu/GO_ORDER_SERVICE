@@ -24,8 +24,7 @@ func GetDataServices(env string) *DataAccessService {
 	confManager := config.NewConfigurationManager("./yml", "application", env)
 	rabbitConfig := confManager.GetRabbitConfiguration()
 	queueConfig := confManager.GetQueuesConfiguration()
-	publisherConfig := confManager.GetPublisherConfiguration()
-	rabbitClient := rabbit.NewRabbitClient(*rabbitConfig, *queueConfig, *publisherConfig)
+	rabbitClient := rabbit.NewRabbitClient(*rabbitConfig, *queueConfig)
 	dataAccessService.RabbitClient = rabbitClient
 	return dataAccessService
 }

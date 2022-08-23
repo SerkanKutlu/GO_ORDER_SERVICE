@@ -1,10 +1,10 @@
 package main
 
 import (
-	"edu_src_Go/config"
-	"edu_src_Go/dataservice/mongodb"
-	"edu_src_Go/handler"
-	"edu_src_Go/pkg/rabbit"
+	"github.com/SerkanKutlu/orderService/config"
+	"github.com/SerkanKutlu/orderService/dataservice/mongodb"
+	"github.com/SerkanKutlu/orderService/handler"
+	"github.com/SerkanKutlu/orderService/pkg/rabbit"
 	"github.com/labstack/echo/v4"
 	"os"
 )

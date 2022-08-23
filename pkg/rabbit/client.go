@@ -1,8 +1,8 @@
 package rabbit
 
 import (
-	"edu_src_Go/config"
 	"fmt"
+	"github.com/SerkanKutlu/orderService/config"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"time"
 )

@@ -1,8 +1,8 @@
 package dataservice
 
 import (
-	"edu_src_Go/customerror"
-	"edu_src_Go/model"
+	"github.com/SerkanKutlu/orderService/customerror"
+	"github.com/SerkanKutlu/orderService/model"
 )
 
 type OrderDataInterface interface {

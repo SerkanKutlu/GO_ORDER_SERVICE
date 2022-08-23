@@ -1,9 +1,9 @@
 package handler
 
 import (
-	"edu_src_Go/customerror"
-	"edu_src_Go/dto"
-	"edu_src_Go/pkg/utils"
+	"github.com/SerkanKutlu/orderService/customerror"
+	"github.com/SerkanKutlu/orderService/dto"
+	"github.com/SerkanKutlu/orderService/pkg/utils"
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 )

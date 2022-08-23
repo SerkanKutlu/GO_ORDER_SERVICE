@@ -1,6 +1,6 @@
 package handler
 
-import "edu_src_Go/dataservice"
+import "github.com/SerkanKutlu/orderService/dataservice"
 
 type DataAccessService struct {
 	OrderService   dataservice.OrderDataInterface

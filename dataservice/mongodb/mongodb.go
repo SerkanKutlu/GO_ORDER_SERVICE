@@ -2,7 +2,7 @@ package mongodb
 
 import (
 	"context"
-	"edu_src_Go/config"
+	"github.com/SerkanKutlu/orderService/config"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"

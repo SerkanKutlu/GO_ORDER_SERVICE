@@ -1,7 +1,7 @@
 package dto
 
 import (
-	"edu_src_Go/model"
+	"github.com/SerkanKutlu/orderService/model"
 	uuid "github.com/satori/go.uuid"
 	"time"
 )

@@ -1,9 +1,9 @@
 package utils
 
 import (
-	"edu_src_Go/customerror"
-	"edu_src_Go/model"
 	"encoding/json"
+	"github.com/SerkanKutlu/orderService/customerror"
+	"github.com/SerkanKutlu/orderService/model"
 	"io/ioutil"
 	"net/http"
 )

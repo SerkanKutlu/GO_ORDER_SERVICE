@@ -1,7 +1,7 @@
 package dto
 
 import (
-	"edu_src_Go/model"
+	"github.com/SerkanKutlu/orderService/model"
 )
 
 type ProductForUpdateDto struct {

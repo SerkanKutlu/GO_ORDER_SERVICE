@@ -1,6 +1,6 @@
 package rabbit
 
-import "edu_src_Go/config"
+import "github.com/SerkanKutlu/orderService/config"
 
 var registeredQueues []config.Queue
 

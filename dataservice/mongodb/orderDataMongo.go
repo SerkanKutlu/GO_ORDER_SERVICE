@@ -2,8 +2,8 @@ package mongodb
 
 import (
 	"context"
-	"edu_src_Go/customerror"
-	"edu_src_Go/model"
+	"github.com/SerkanKutlu/orderService/customerror"
+	"github.com/SerkanKutlu/orderService/model"
 	"go.mongodb.org/mongo-driver/bson"
 	"time"
 )

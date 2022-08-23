@@ -7,20 +7,20 @@ import (
 	"time"
 )
 
-type client struct {
+type Client struct {
 	connection  *amqp.Connection
 	queueConfig *config.QueueConfig
 }
 
-func NewRabbitClient(rabbitConfig config.RabbitConfig, queueConfig config.QueueConfig) *client {
+func NewRabbitClient(rabbitConfig config.RabbitConfig, queueConfig config.QueueConfig) *Client {
 	connection := createConnection(rabbitConfig)
-	return &client{
+	return &Client{
 		connection:  connection,
 		queueConfig: &queueConfig,
 	}
 }
 
-func (client *client) SetAllConfigurations() {
+func (client *Client) SetAllConfigurations() {
 	channel := client.createChannel()
 	queues := client.getRegisteredQueues()
 	for _, queue := range *queues {
@@ -28,10 +28,9 @@ func (client *client) SetAllConfigurations() {
 		declareExchange(channel, queue)
 		bindQueue(channel, queue)
 	}
-
 }
 
-func (client *client) createChannel() *amqp.Channel {
+func (client *Client) createChannel() *amqp.Channel {
 	channel, err := client.connection.Channel()
 	if err != nil {
 		panic("Rabbit channel creation error: " + err.Error())
@@ -73,7 +72,7 @@ func createConnection(rabbitConfig config.RabbitConfig) *amqp.Connection {
 	return connection
 }
 
-func (client *client) CloseConnection() {
+func (client *Client) CloseConnection() {
 	err := client.connection.Close()
 	if err != nil {
 		panic("Rabbit mq connection close failed")

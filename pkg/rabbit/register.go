@@ -1,10 +1,12 @@
 package rabbit
 
-import "github.com/SerkanKutlu/orderService/config"
+import (
+	"github.com/SerkanKutlu/orderService/config"
+)
 
 var registeredQueues []config.Queue
 
-func (client *client) getRegisteredQueues() *[]config.Queue {
+func (client *Client) getRegisteredQueues() *[]config.Queue {
 	if registeredQueues != nil {
 		return &registeredQueues
 	}

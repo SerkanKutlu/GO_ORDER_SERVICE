@@ -14,7 +14,7 @@ func NewConfigurationManager(env string) *configurationManager {
 	viper.AddConfigPath("./yml")
 	viper.SetConfigType("yml")
 	appConfig := readApplicationConfigFile(env)
-	queueConfig := readQueuesConfigFile()
+	queueConfig := readQueuesConfigFile(env)
 	publisherConfig := readPublisherConfigFile(env)
 	return &configurationManager{
 		applicationConfig: appConfig,
@@ -53,13 +53,13 @@ func readApplicationConfigFile(env string) *ApplicationConfig {
 	return &appConfig
 }
 
-func readQueuesConfigFile() *QueueConfig {
-	viper.SetConfigName("rabbit-queue")
+func readQueuesConfigFile(env string) *QueueConfig {
+	viper.SetConfigName("rabbit")
 	if err := viper.ReadInConfig(); err != nil {
 		panic("Can not load application config file")
 	}
 	var queueConfig QueueConfig
-	envSub := viper.Sub("queue")
+	envSub := viper.Sub(env)
 	if err := envSub.Unmarshal(&queueConfig); err != nil {
 		panic(err.Error())
 	}

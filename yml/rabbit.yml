@@ -1,8 +1,12 @@
 dev:
-  orderPublisher:
+  order:
     orderCreated:
-      exchangeName : "orderExchange"
+      exchange: "orderExchange"
+      exchangeType: "topic"
       routingKey : "order.created"
+      queue : "orderCreatedQueue"
     orderUpdated:
-      exchangeName : "orderExchange"
-      routingKey : "order.updated"
+      exchange: "orderExchange"
+      exchangeType: "topic"
+      routingKey: "order.updated"
+      queue: "orderUpdatedQueue"

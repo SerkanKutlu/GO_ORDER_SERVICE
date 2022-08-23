@@ -18,8 +18,8 @@ type Client struct {
 }
 
 func (client *Client) PublishAtCreated(message *events.OrderCreated) error {
-	exchangeName := client.publisherConfig.OrderPublisher.OrderCreated.ExchangeName
-	routingKey := client.publisherConfig.OrderPublisher.OrderCreated.RoutingKey
+	exchangeName := client.publisherConfig.Order.OrderCreated.Exchange
+	routingKey := client.publisherConfig.Order.OrderCreated.RoutingKey
 	byteBody, err := json.Marshal(message)
 	if err != nil {
 		return err
@@ -34,8 +34,8 @@ func (client *Client) PublishAtCreated(message *events.OrderCreated) error {
 	return nil
 }
 func (client *Client) PublishAtUpdated(message *events.OrderUpdated) error {
-	exchangeName := client.publisherConfig.OrderPublisher.OrderUpdated.ExchangeName
-	routingKey := client.publisherConfig.OrderPublisher.OrderUpdated.RoutingKey
+	exchangeName := client.publisherConfig.Order.OrderUpdated.Exchange
+	routingKey := client.publisherConfig.Order.OrderUpdated.RoutingKey
 	byteBody, err := json.Marshal(message)
 	if err != nil {
 		return err

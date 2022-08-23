@@ -44,7 +44,6 @@ func main() {
 	e.GET("/api/product/:id", orderServiceHandler.GetByIdProduct)
 	e.POST("/api/product", orderServiceHandler.PostProduct)
 	e.PUT("/api/product", orderServiceHandler.PutProduct)
-
 	err := e.Start(":9000")
 	if err != nil {
 		panic(err)

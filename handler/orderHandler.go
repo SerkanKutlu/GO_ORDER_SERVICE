@@ -3,6 +3,7 @@ package handler
 import (
 	"github.com/SerkanKutlu/orderService/customerror"
 	"github.com/SerkanKutlu/orderService/dto"
+	"github.com/SerkanKutlu/orderService/events"
 	"github.com/SerkanKutlu/orderService/pkg/utils"
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
@@ -75,9 +76,12 @@ func (ds *DataAccessService) PostOrder(c echo.Context) error {
 	}
 
 	//Publish to rabbit
-	//event := new(events.OrderCreated)
-	//event.FillCreated(newOrder)
-	//rabbit.Publish(event, "go.create")
+	var event = new(events.OrderCreated)
+	event.FillCreated(newOrder)
+	if err := ds.RabbitClient.PublishAtCreated(event); err != nil {
+		errorMessage := customerror.NewError(err.Error(), 500)
+		return c.JSON(errorMessage.StatusCode, errorMessage)
+	}
 
 	//Return
 	return c.JSON(201, newOrder.Id)
@@ -128,10 +132,12 @@ func (ds *DataAccessService) PutOrder(c echo.Context) error {
 	}
 
 	//Publish to rabbit
-	//event := new(events.OrderUpdated)
-	//event.FillUpdated(updatedOrder)
-	//rabbit.Publish(event, "go.update")
-	//Return
+	var event = new(events.OrderUpdated)
+	event.FillUpdated(updatedOrder)
+	if err := ds.RabbitClient.PublishAtUpdated(event); err != nil {
+		errorMessage := customerror.NewError(err.Error(), 500)
+		return c.JSON(errorMessage.StatusCode, errorMessage)
+	}
 	return c.JSON(200, "")
 
 }

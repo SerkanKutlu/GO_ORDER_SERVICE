@@ -4,7 +4,6 @@ import (
 	"github.com/SerkanKutlu/orderService/config"
 	"github.com/SerkanKutlu/orderService/dataservice/mongodb"
 	"github.com/SerkanKutlu/orderService/handler"
-	"github.com/SerkanKutlu/orderService/pkg/rabbit"
 	"github.com/labstack/echo/v4"
 	"os"
 )
@@ -15,18 +14,12 @@ func main() {
 
 	confManager := config.NewConfigurationManager(env)
 
-	//RABBIT MQ
-	rabbitConfig := confManager.GetRabbitConfiguration()
-	queueConfig := confManager.GetQueuesConfiguration()
-	rabbitClient := rabbit.NewRabbitClient(*rabbitConfig, *queueConfig)
-	rabbitClient.SetAllConfigurations()
-	defer rabbitClient.CloseConnection()
 	///MONGO
 	mongoConfig := confManager.GetMongoConfiguration()
 	mongo := mongodb.GetMongoDb(mongoConfig)
 	handler.SetProductDataService(mongo)
 	handler.SetOrderDataService(mongo)
-	orderServiceHandler := handler.GetDataServices()
+	orderServiceHandler := handler.GetDataServices(env)
 
 	e := echo.New()
 	//Order Controls

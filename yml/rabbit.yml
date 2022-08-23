@@ -1,0 +1,8 @@
+dev:
+  orderPublisher:
+    orderCreated:
+      exchangeName : "orderExchange"
+      routingKey : "order.created"
+    orderUpdated:
+      exchangeName : "orderExchange"
+      routingKey : "order.updated"

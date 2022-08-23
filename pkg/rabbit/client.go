@@ -1,42 +1,85 @@
 package rabbit
 
 import (
+	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/SerkanKutlu/orderService/config"
+	"github.com/SerkanKutlu/orderService/events"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"time"
 )
 
 type Client struct {
-	connection  *amqp.Connection
-	queueConfig *config.QueueConfig
+	connection      *amqp.Connection
+	channel         *amqp.Channel
+	queueConfig     *config.QueueConfig
+	publisherConfig *config.PublisherConfig
 }
 
-func NewRabbitClient(rabbitConfig config.RabbitConfig, queueConfig config.QueueConfig) *Client {
-	connection := createConnection(rabbitConfig)
-	return &Client{
-		connection:  connection,
-		queueConfig: &queueConfig,
+func (client *Client) PublishAtCreated(message *events.OrderCreated) error {
+	exchangeName := client.publisherConfig.OrderPublisher.OrderCreated.ExchangeName
+	routingKey := client.publisherConfig.OrderPublisher.OrderCreated.RoutingKey
+	byteBody, err := json.Marshal(message)
+	if err != nil {
+		return err
 	}
+	err = client.channel.PublishWithContext(context.Background(), exchangeName, routingKey, false, false, amqp.Publishing{
+		ContentType: "text/plain",
+		Body:        byteBody,
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+func (client *Client) PublishAtUpdated(message *events.OrderUpdated) error {
+	exchangeName := client.publisherConfig.OrderPublisher.OrderUpdated.ExchangeName
+	routingKey := client.publisherConfig.OrderPublisher.OrderUpdated.RoutingKey
+	byteBody, err := json.Marshal(message)
+	if err != nil {
+		return err
+	}
+	err = client.channel.PublishWithContext(context.Background(), exchangeName, routingKey, false, false, amqp.Publishing{
+		ContentType: "text/plain",
+		Body:        byteBody,
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+func NewRabbitClient(rabbitConfig config.RabbitConfig, queueConfig config.QueueConfig, publisherConfig config.PublisherConfig) *Client {
+	connection := createConnection(rabbitConfig)
+	channel := createChannel(connection)
+	client := &Client{
+		connection:      connection,
+		channel:         channel,
+		queueConfig:     &queueConfig,
+		publisherConfig: &publisherConfig,
+	}
+	client.setAllConfigurations()
+	return client
 }
 
-func (client *Client) SetAllConfigurations() {
-	channel := client.createChannel()
+//Creating channel, declare queues and exchanges, binding.
+func (client *Client) setAllConfigurations() {
 	queues := client.getRegisteredQueues()
 	for _, queue := range *queues {
-		declareQueue(channel, queue)
-		declareExchange(channel, queue)
-		bindQueue(channel, queue)
+		declareQueue(client.channel, queue)
+		declareExchange(client.channel, queue)
+		bindQueue(client.channel, queue)
 	}
 }
 
-func (client *Client) createChannel() *amqp.Channel {
-	channel, err := client.connection.Channel()
+func createChannel(connection *amqp.Connection) *amqp.Channel {
+	channel, err := connection.Channel()
 	if err != nil {
 		panic("Rabbit channel creation error: " + err.Error())
 	}
 	return channel
 }
+
 func declareExchange(channel *amqp.Channel, queueConfig config.Queue) {
 	if err := channel.ExchangeDeclare(queueConfig.Exchange, queueConfig.ExchangeType, true, false, false, false, nil); err != nil {
 		panic("Exchange declare fail: " + err.Error())
@@ -55,6 +98,7 @@ func bindQueue(channel *amqp.Channel, queueConfig config.Queue) {
 		panic("Queue binding fail: " + err.Error())
 	}
 }
+
 func createConnection(rabbitConfig config.RabbitConfig) *amqp.Connection {
 	amqpConfig := amqp.Config{
 		Heartbeat: 30 * time.Second,
@@ -78,6 +122,7 @@ func (client *Client) CloseConnection() {
 		panic("Rabbit mq connection close failed")
 	}
 }
+
 func getConnectionUrl(rabbitConfig config.RabbitConfig) string {
 	return fmt.Sprintf("amqp://%s:%s@%s:%d/%s", rabbitConfig.Username, rabbitConfig.Password, rabbitConfig.Host, rabbitConfig.Port, rabbitConfig.VirtualHost)
 }

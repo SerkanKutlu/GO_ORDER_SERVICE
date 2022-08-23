@@ -7,6 +7,7 @@ import (
 type configurationManager struct {
 	applicationConfig *ApplicationConfig
 	queuesConfig      *QueueConfig
+	publisherConfig   *PublisherConfig
 }
 
 func NewConfigurationManager(env string) *configurationManager {
@@ -14,9 +15,11 @@ func NewConfigurationManager(env string) *configurationManager {
 	viper.SetConfigType("yml")
 	appConfig := readApplicationConfigFile(env)
 	queueConfig := readQueuesConfigFile()
+	publisherConfig := readPublisherConfigFile(env)
 	return &configurationManager{
 		applicationConfig: appConfig,
 		queuesConfig:      queueConfig,
+		publisherConfig:   publisherConfig,
 	}
 }
 
@@ -30,6 +33,10 @@ func (cm *configurationManager) GetMongoConfiguration() *MongoConfig {
 
 func (cm *configurationManager) GetQueuesConfiguration() *QueueConfig {
 	return cm.queuesConfig
+}
+
+func (cm *configurationManager) GetPublisherConfiguration() *PublisherConfig {
+	return cm.publisherConfig
 }
 
 func readApplicationConfigFile(env string) *ApplicationConfig {
@@ -57,4 +64,17 @@ func readQueuesConfigFile() *QueueConfig {
 		panic(err.Error())
 	}
 	return &queueConfig
+}
+
+func readPublisherConfigFile(env string) *PublisherConfig {
+	viper.SetConfigName("rabbit")
+	if err := viper.ReadInConfig(); err != nil {
+		panic("Can not load application config file")
+	}
+	var publisherConfig PublisherConfig
+	envSub := viper.Sub(env)
+	if err := envSub.Unmarshal(&publisherConfig); err != nil {
+		panic(err.Error())
+	}
+	return &publisherConfig
 }

@@ -57,6 +57,7 @@ func NewRabbitClient(rabbitConfig config.RabbitConfig, queueConfig config.QueueC
 		Channel:     channel,
 		QueueConfig: &queueConfig,
 	}
+
 	client.setAllConfigurations()
 	return client
 }
@@ -112,6 +113,8 @@ func createConnection(rabbitConfig config.RabbitConfig) *amqp.Connection {
 		panic("Rabbit mq connection failed")
 	}
 	fmt.Println("Rabbit connection is done")
+	//Listening rabbit connection errors
+
 	return connection
 }
 

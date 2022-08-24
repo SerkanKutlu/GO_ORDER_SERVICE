@@ -22,6 +22,7 @@ func main() {
 	queueConfig := confManager.GetQueuesConfiguration()
 	//Setting Rabbit Client
 	handler.SetRabbitClient(*rabbitConfig, *queueConfig)
+
 	//Getting Http Client Configurations
 	remoteServerConfiguration := confManager.GetRemoteServerConfiguration()
 	//Setting Http Client

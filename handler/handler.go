@@ -4,52 +4,39 @@ import (
 	"github.com/SerkanKutlu/orderService/config"
 	"github.com/SerkanKutlu/orderService/model"
 	"github.com/SerkanKutlu/orderService/pkg/rabbit"
+	"github.com/SerkanKutlu/orderService/pkg/utils"
 	"github.com/SerkanKutlu/orderService/repository/mongodb"
 )
 
 type OrderService struct {
-	MongoService *mongodb.MongoService
-	//OrderService   repository.IOrderRepository
-	//ProductService repository.IProductRepository
-	RabbitClient *rabbit.Client
-}
-type GenericRepository struct {
-	GenericOrder   *mongodb.GenericRepository[model.Order]
-	GenericProduct *mongodb.GenericRepository[model.Product]
+	MongoService      *mongodb.MongoService
+	RabbitClient      *rabbit.Client
+	GenericRepository *mongodb.GenericRepository
+	HttpClient        *utils.HttpClient
 }
 
-var genericRepository *GenericRepository
-var dataAccessService = new(OrderService)
-var rabbitClient *rabbit.Client
+var orderService = new(OrderService)
 
-func GetDataServices(env string) *OrderService {
-	if rabbitClient != nil {
-		dataAccessService.RabbitClient = rabbitClient
-		return dataAccessService
-	}
-	//RABBIT MQ
-	confManager := config.NewConfigurationManager("./yml", "application", env)
-	rabbitConfig := confManager.GetRabbitConfiguration()
-	queueConfig := confManager.GetQueuesConfiguration()
-	rabbitClient := rabbit.NewRabbitClient(*rabbitConfig, *queueConfig)
-	dataAccessService.RabbitClient = rabbitClient
-	return dataAccessService
+func GetOrderService() *OrderService {
+	return orderService
 }
-func SetDataServices(mongoService *mongodb.MongoService) {
-	dataAccessService.MongoService = mongoService
-	genericRepository = new(GenericRepository)
-	genericRepository.GenericOrder = &mongodb.GenericRepository[model.Order]{
+func SetOrderRepository(mongoService *mongodb.MongoService) {
+	orderService.MongoService = mongoService
+	orderService.GenericRepository = new(mongodb.GenericRepository)
+	orderService.GenericRepository.GenericOrder = &mongodb.GenericCollection[model.Order]{
 		Collection: mongoService.Orders,
 	}
-	genericRepository.GenericProduct = &mongodb.GenericRepository[model.Product]{
+	orderService.GenericRepository.GenericProduct = &mongodb.GenericCollection[model.Product]{
 		Collection: mongoService.Products,
 	}
 }
+func SetRabbitClient(rabbitConfig config.RabbitConfig, queueConfig config.QueueConfig) {
+	orderService.RabbitClient = new(rabbit.Client)
+	orderService.RabbitClient = rabbit.NewRabbitClient(rabbitConfig, queueConfig)
+}
 
-//func SetOrderDataService(orderService repository.IOrderRepository) {
-//	dataAccessService.OrderService = orderService
-//}
-//
-//func SetProductDataService(productService repository.IProductRepository) {
-//	dataAccessService.ProductService = productService
-//}
+func SetHttpClient(remoteServers config.RemoteServicesConfig) {
+	orderService.HttpClient = new(utils.HttpClient)
+	orderService.HttpClient.ServiceUrlMap = make(map[string]string)
+	orderService.HttpClient.ServiceUrlMap[remoteServers.CustomerService.Name] = remoteServers.CustomerService.BaseUrl
+}

@@ -21,3 +21,6 @@ dev:
       exchangeType: "topic"
       routingKey: "order.updated"
       queue: "orderUpdatedQueue"
+  customerService:
+    name : "CustomerService"
+    baseUrl: "http://localhost:5000/"

@@ -10,16 +10,25 @@ import (
 
 func main() {
 	env := os.Getenv("GO_ENV")
-
 	confManager := config.NewConfigurationManager("./yml", "application", env)
-
-	//DATA ACCESS
+	//Getting Mongo Configurations
 	mongoConfig := confManager.GetMongoConfiguration()
+	//Getting Mongo Service
 	mongoService := mongodb.GetMongoService(mongoConfig)
-	handler.SetDataServices(mongoService)
-	//handler.SetProductDataService(mongoService)
-	//handler.SetOrderDataService(mongoService)
-	orderService := handler.GetDataServices(env)
+	//Setting Mongo Repository by using Mongo Service
+	handler.SetOrderRepository(mongoService)
+	//Getting Rabbit Configurations
+	rabbitConfig := confManager.GetRabbitConfiguration()
+	queueConfig := confManager.GetQueuesConfiguration()
+	//Setting Rabbit Client
+	handler.SetRabbitClient(*rabbitConfig, *queueConfig)
+	//Getting Http Client Configurations
+	remoteServerConfiguration := confManager.GetRemoteServerConfiguration()
+	//Setting Http Client
+	handler.SetHttpClient(*remoteServerConfiguration)
+
+	//Getting Order Service that will be used at handler methods.
+	orderService := handler.GetOrderService()
 
 	e := echo.New()
 	//Order Controls

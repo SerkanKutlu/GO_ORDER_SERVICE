@@ -5,8 +5,9 @@ import (
 )
 
 type configurationManager struct {
-	applicationConfig *ApplicationConfig
-	queuesConfig      *QueueConfig
+	applicationConfig    *ApplicationConfig
+	queuesConfig         *QueueConfig
+	remoteServicesConfig *RemoteServicesConfig
 }
 
 func NewConfigurationManager(path string, file string, env string) *configurationManager {
@@ -14,9 +15,11 @@ func NewConfigurationManager(path string, file string, env string) *configuratio
 	viper.SetConfigType("yml")
 	appConfig := readApplicationConfigFile(env, file)
 	queueConfig := readQueuesConfigFile(env, file)
+	remoteServerConfig := readRemoteServicesConfigFile(env, file)
 	return &configurationManager{
-		applicationConfig: appConfig,
-		queuesConfig:      queueConfig,
+		applicationConfig:    appConfig,
+		queuesConfig:         queueConfig,
+		remoteServicesConfig: remoteServerConfig,
 	}
 }
 
@@ -32,6 +35,10 @@ func (cm *configurationManager) GetQueuesConfiguration() *QueueConfig {
 	return cm.queuesConfig
 }
 
+func (cm *configurationManager) GetRemoteServerConfiguration() *RemoteServicesConfig {
+	return cm.remoteServicesConfig
+}
+
 func readApplicationConfigFile(env string, file string) *ApplicationConfig {
 
 	viper.SetConfigName(file)
@@ -45,7 +52,6 @@ func readApplicationConfigFile(env string, file string) *ApplicationConfig {
 	}
 	return &appConfig
 }
-
 func readQueuesConfigFile(env string, file string) *QueueConfig {
 	viper.SetConfigName(file)
 	if err := viper.ReadInConfig(); err != nil {
@@ -57,4 +63,16 @@ func readQueuesConfigFile(env string, file string) *QueueConfig {
 		panic(err.Error())
 	}
 	return &queueConfig
+}
+func readRemoteServicesConfigFile(env string, file string) *RemoteServicesConfig {
+	viper.SetConfigName(file)
+	if err := viper.ReadInConfig(); err != nil {
+		panic("Can not load application config file")
+	}
+	var remoteConfig RemoteServicesConfig
+	envSub := viper.Sub(env)
+	if err := envSub.Unmarshal(&remoteConfig); err != nil {
+		panic(err.Error())
+	}
+	return &remoteConfig
 }

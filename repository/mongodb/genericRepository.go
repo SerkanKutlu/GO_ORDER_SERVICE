@@ -12,12 +12,17 @@ type Entity interface {
 	model.Order | model.Product
 }
 
-type GenericRepository[T Entity] struct {
+type GenericCollection[T Entity] struct {
 	Collection *mongo.Collection
 }
 
-func (ec *GenericRepository[T]) FindAll() (*[]T, *customerror.CustomError) {
-	cursor, err := ec.Collection.Find(context.Background(), bson.M{})
+type GenericRepository struct {
+	GenericOrder   *GenericCollection[model.Order]
+	GenericProduct *GenericCollection[model.Product]
+}
+
+func (gc *GenericCollection[T]) FindAll() (*[]T, *customerror.CustomError) {
+	cursor, err := gc.Collection.Find(context.Background(), bson.M{})
 	if err != nil {
 		return nil, customerror.InternalServerError
 	}
@@ -31,24 +36,24 @@ func (ec *GenericRepository[T]) FindAll() (*[]T, *customerror.CustomError) {
 	}
 	return &entities, nil
 }
-func (ec *GenericRepository[T]) FindById(id string) (*T, *customerror.CustomError) {
+func (gc *GenericCollection[T]) FindById(id string) (*T, *customerror.CustomError) {
 	filter := bson.M{"_id": id}
 	var entity T
-	err := ec.Collection.FindOne(context.Background(), filter).Decode(&entity)
+	err := gc.Collection.FindOne(context.Background(), filter).Decode(&entity)
 	if err != nil {
 		return nil, customerror.OrderNotFoundError
 	}
 	return &entity, nil
 }
-func (ec *GenericRepository[T]) Insert(entity *T) *customerror.CustomError {
-	_, err := ec.Collection.InsertOne(context.Background(), entity)
+func (gc *GenericCollection[T]) Insert(entity *T) *customerror.CustomError {
+	_, err := gc.Collection.InsertOne(context.Background(), entity)
 	if err != nil {
 		return customerror.InternalServerError
 	}
 	return nil
 }
-func (ec *GenericRepository[T]) Update(entity *T, entityId string) *customerror.CustomError {
-	result, err := ec.Collection.ReplaceOne(context.Background(), bson.M{"_id": entityId}, entity)
+func (gc *GenericCollection[T]) Update(entity *T, entityId string) *customerror.CustomError {
+	result, err := gc.Collection.ReplaceOne(context.Background(), bson.M{"_id": entityId}, entity)
 	if err != nil {
 		return customerror.InternalServerError
 	}
@@ -57,8 +62,8 @@ func (ec *GenericRepository[T]) Update(entity *T, entityId string) *customerror.
 	}
 	return nil
 }
-func (ec *GenericRepository[T]) Delete(id string) *customerror.CustomError {
-	result, err := ec.Collection.DeleteOne(context.TODO(), bson.M{"_id": id})
+func (gc *GenericCollection[T]) Delete(id string) *customerror.CustomError {
+	result, err := gc.Collection.DeleteOne(context.TODO(), bson.M{"_id": id})
 	if err != nil {
 		return customerror.InternalServerError
 	}

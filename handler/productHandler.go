@@ -8,7 +8,7 @@ import (
 )
 
 func (ds *OrderService) GetAllProducts(c echo.Context) error {
-	products, err := genericRepository.GenericProduct.FindAll()
+	products, err := ds.GenericRepository.GenericProduct.FindAll()
 	if err != nil {
 		return c.JSON(500, err)
 	}
@@ -17,7 +17,7 @@ func (ds *OrderService) GetAllProducts(c echo.Context) error {
 
 func (ds *OrderService) GetByIdProduct(c echo.Context) error {
 	id := c.Param("id")
-	product, err := genericRepository.GenericProduct.FindById(id)
+	product, err := ds.GenericRepository.GenericProduct.FindById(id)
 	if err != nil {
 		return c.JSON(err.StatusCode, err)
 	}
@@ -40,7 +40,7 @@ func (ds *OrderService) PostProduct(c echo.Context) error {
 	//Dto to product
 	newProduct := productDto.ToProduct()
 	//Insert to db
-	if err := genericRepository.GenericProduct.Insert(newProduct); err != nil {
+	if err := ds.GenericRepository.GenericProduct.Insert(newProduct); err != nil {
 		return c.JSON(err.StatusCode, err)
 	}
 	return c.JSON(201, newProduct.Id)
@@ -63,7 +63,7 @@ func (ds *OrderService) PutProduct(c echo.Context) error {
 	//Dto to product
 	updatedProduct := productDto.ToProduct()
 	//Update
-	if err := genericRepository.GenericProduct.Update(updatedProduct, updatedProduct.Id); err != nil {
+	if err := ds.GenericRepository.GenericProduct.Update(updatedProduct, updatedProduct.Id); err != nil {
 		return c.JSON(err.StatusCode, err)
 	}
 	return c.JSON(200, "")
@@ -71,7 +71,7 @@ func (ds *OrderService) PutProduct(c echo.Context) error {
 
 func (ds *OrderService) DeleteProduct(c echo.Context) error {
 	id := c.Param("id")
-	if err := genericRepository.GenericProduct.Delete(id); err != nil {
+	if err := ds.GenericRepository.GenericProduct.Delete(id); err != nil {
 		return c.JSON(err.StatusCode, err)
 	}
 	return c.JSON(200, "")

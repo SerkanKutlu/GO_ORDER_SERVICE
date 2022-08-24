@@ -2,18 +2,20 @@ package utils
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/SerkanKutlu/orderService/customerror"
 	"github.com/SerkanKutlu/orderService/model"
 	"io/ioutil"
 	"net/http"
 )
 
-func GetCustomerAddress(customerId string) (*model.Address, *customerror.CustomError) {
-	url := "http://localhost:5000/customers/" + customerId
+type HttpClient struct {
+	ServiceUrlMap map[string]string
+}
+
+func (hc *HttpClient) GetCustomerAddress(customerId string) (*model.Address, *customerror.CustomError) {
+	url := fmt.Sprintf("%s%s%s", hc.ServiceUrlMap["CustomerService"], "customers/", customerId)
 	resp, err := http.Get(url)
-	if err != nil {
-		return nil, customerror.InternalServerError
-	}
 	if resp.StatusCode == 404 {
 		return nil, customerror.CustomerNotFoundError
 	}

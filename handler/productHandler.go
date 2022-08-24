@@ -7,24 +7,24 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func (ds *DataAccessService) GetAllProducts(c echo.Context) error {
-	products, err := ds.ProductService.FindAllProducts()
+func (ds *OrderService) GetAllProducts(c echo.Context) error {
+	products, err := genericRepository.GenericProduct.FindAll()
 	if err != nil {
 		return c.JSON(500, err)
 	}
 	return c.JSON(200, products)
 }
 
-func (ds *DataAccessService) GetByIdProduct(c echo.Context) error {
+func (ds *OrderService) GetByIdProduct(c echo.Context) error {
 	id := c.Param("id")
-	product, err := ds.ProductService.FindByIdProduct(id)
+	product, err := genericRepository.GenericProduct.FindById(id)
 	if err != nil {
 		return c.JSON(err.StatusCode, err)
 	}
 	return c.JSON(200, product)
 }
 
-func (ds *DataAccessService) PostProduct(c echo.Context) error {
+func (ds *OrderService) PostProduct(c echo.Context) error {
 	var productDto dto.ProductForCreationDto
 	//Binding
 	if err := c.Bind(&productDto); err != nil {
@@ -40,14 +40,14 @@ func (ds *DataAccessService) PostProduct(c echo.Context) error {
 	//Dto to product
 	newProduct := productDto.ToProduct()
 	//Insert to db
-	if err := ds.ProductService.InsertProduct(newProduct); err != nil {
+	if err := genericRepository.GenericProduct.Insert(newProduct); err != nil {
 		return c.JSON(err.StatusCode, err)
 	}
 	return c.JSON(201, newProduct.Id)
 
 }
 
-func (ds *DataAccessService) PutProduct(c echo.Context) error {
+func (ds *OrderService) PutProduct(c echo.Context) error {
 	var productDto dto.ProductForUpdateDto
 	//Binding
 	if err := c.Bind(&productDto); err != nil {
@@ -63,15 +63,15 @@ func (ds *DataAccessService) PutProduct(c echo.Context) error {
 	//Dto to product
 	updatedProduct := productDto.ToProduct()
 	//Update
-	if err := ds.ProductService.UpdateProduct(updatedProduct); err != nil {
+	if err := genericRepository.GenericProduct.Update(updatedProduct, updatedProduct.Id); err != nil {
 		return c.JSON(err.StatusCode, err)
 	}
 	return c.JSON(200, "")
 }
 
-func (ds *DataAccessService) DeleteProduct(c echo.Context) error {
+func (ds *OrderService) DeleteProduct(c echo.Context) error {
 	id := c.Param("id")
-	if err := ds.ProductService.DeleteProduct(id); err != nil {
+	if err := genericRepository.GenericProduct.Delete(id); err != nil {
 		return c.JSON(err.StatusCode, err)
 	}
 	return c.JSON(200, "")

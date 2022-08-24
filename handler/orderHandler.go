@@ -9,33 +9,33 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func (ds *DataAccessService) GetAllOrders(c echo.Context) error {
-	orders, err := ds.OrderService.FindAllOrders()
+func (ds *OrderService) GetAllOrders(c echo.Context) error {
+	orders, err := genericRepository.GenericOrder.FindAll()
 	if err != nil {
 		return c.JSON(500, err)
 	}
 	return c.JSON(200, orders)
 }
 
-func (ds *DataAccessService) GetByIdOrder(c echo.Context) error {
+func (ds *OrderService) GetByIdOrder(c echo.Context) error {
 	id := c.Param("id")
-	order, err := ds.OrderService.FindByIdOrder(id)
+	order, err := genericRepository.GenericOrder.FindById(id)
 	if err != nil {
 		return c.JSON(err.StatusCode, err)
 	}
 	return c.JSON(200, order)
 }
 
-func (ds *DataAccessService) GetOrdersOfCustomers(c echo.Context) error {
+func (ds *OrderService) GetOrdersOfCustomers(c echo.Context) error {
 	customerId := c.Param("id")
-	orders, err := ds.OrderService.FindOrdersOfCustomer(customerId)
+	orders, err := ds.MongoService.FindOrdersOfCustomer(customerId)
 	if err != nil {
 		return c.JSON(err.StatusCode, err)
 	}
 	return c.JSON(200, orders)
 }
 
-func (ds *DataAccessService) PostOrder(c echo.Context) error {
+func (ds *OrderService) PostOrder(c echo.Context) error {
 	var orderDto dto.OrderForCreationDto
 	//Binding
 	if err := c.Bind(&orderDto); err != nil {
@@ -60,7 +60,7 @@ func (ds *DataAccessService) PostOrder(c echo.Context) error {
 	//Product Check, Calculate total and quantity
 	var total float32
 	for _, p := range newOrder.ProductIds {
-		product, err := ds.ProductService.FindByIdProduct(p)
+		product, err := genericRepository.GenericProduct.FindById(p)
 		if err != nil {
 			customErr := customerror.NewError("Product with id: "+p+" not found", 404)
 			return c.JSON(customErr.StatusCode, customErr)
@@ -71,7 +71,7 @@ func (ds *DataAccessService) PostOrder(c echo.Context) error {
 	newOrder.Quantity = len(newOrder.ProductIds)
 
 	//Insert to db
-	if err := ds.OrderService.InsertOrder(newOrder); err != nil {
+	if err := genericRepository.GenericOrder.Insert(newOrder); err != nil {
 		return c.JSON(err.StatusCode, err)
 	}
 
@@ -88,7 +88,7 @@ func (ds *DataAccessService) PostOrder(c echo.Context) error {
 
 }
 
-func (ds *DataAccessService) PutOrder(c echo.Context) error {
+func (ds *OrderService) PutOrder(c echo.Context) error {
 	var orderDto dto.OrderForUpdateDto
 	//Binding
 	if err := c.Bind(&orderDto); err != nil {
@@ -104,7 +104,7 @@ func (ds *DataAccessService) PutOrder(c echo.Context) error {
 	//Product Check, Calculate total and quantity
 	var total float32
 	for _, p := range orderDto.ProductIds {
-		product, err := ds.ProductService.FindByIdProduct(p)
+		product, err := genericRepository.GenericProduct.FindById(p)
 		if err != nil {
 			customErr := customerror.NewError("Product with id: "+product.Id+" not found", 404)
 			return c.JSON(customErr.StatusCode, customErr)
@@ -117,7 +117,7 @@ func (ds *DataAccessService) PutOrder(c echo.Context) error {
 	updatedOrder.Quantity = len(updatedOrder.ProductIds)
 	updatedOrder.Total = total
 	//Set createdAt field
-	oldOrder, err := ds.OrderService.FindByIdOrder(updatedOrder.Id)
+	oldOrder, err := genericRepository.GenericOrder.FindById(updatedOrder.Id)
 	if err != nil {
 		return c.JSON(err.StatusCode, err)
 	}
@@ -127,7 +127,7 @@ func (ds *DataAccessService) PutOrder(c echo.Context) error {
 	updatedOrder.CustomerId = oldOrder.CustomerId
 
 	//Update order
-	if err := ds.OrderService.UpdateOrder(updatedOrder); err != nil {
+	if err := genericRepository.GenericOrder.Update(updatedOrder, updatedOrder.Id); err != nil {
 		return c.JSON(err.StatusCode, err)
 	}
 
@@ -142,30 +142,30 @@ func (ds *DataAccessService) PutOrder(c echo.Context) error {
 
 }
 
-func (ds *DataAccessService) PutOrderStatus(c echo.Context) error {
+func (ds *OrderService) PutOrderStatus(c echo.Context) error {
 	id := c.Param("id")
 	status := c.Param("status")
 	if status == "" {
 		err := customerror.NewError("Status can not be empty", 400)
 		return c.JSON(err.StatusCode, err)
 	}
-	if err := ds.OrderService.UpdateStatusFieldOrder(id, status); err != nil {
+	if err := ds.MongoService.UpdateStatusFieldOrder(id, status); err != nil {
 		return c.JSON(err.StatusCode, err)
 	}
 	return c.JSON(200, "")
 }
 
-func (ds *DataAccessService) DeleteOrder(c echo.Context) error {
+func (ds *OrderService) DeleteOrder(c echo.Context) error {
 	id := c.Param("id")
-	if err := ds.OrderService.DeleteOrder(id); err != nil {
+	if err := genericRepository.GenericOrder.Delete(id); err != nil {
 		return c.JSON(err.StatusCode, err)
 	}
 	return c.JSON(200, "")
 }
 
-func (ds *DataAccessService) DeleteOrdersOfCustomer(c echo.Context) error {
+func (ds *OrderService) DeleteOrdersOfCustomer(c echo.Context) error {
 	customerId := c.Param("id")
-	if err := ds.OrderService.DeleteOrdersOfCustomer(customerId); err != nil {
+	if err := ds.MongoService.DeleteOrdersOfCustomer(customerId); err != nil {
 		return c.JSON(err.StatusCode, err)
 	}
 	return c.JSON(200, "")

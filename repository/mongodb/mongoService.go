@@ -9,12 +9,12 @@ import (
 	"time"
 )
 
-type MongoDb struct {
+type MongoService struct {
 	Orders   *mongo.Collection
 	Products *mongo.Collection
 }
 
-func GetMongoDb(mongoConfig *config.MongoConfig) *MongoDb {
+func GetMongoService(mongoConfig *config.MongoConfig) *MongoService {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI(mongoConfig.ConnectionString))
@@ -27,7 +27,7 @@ func GetMongoDb(mongoConfig *config.MongoConfig) *MongoDb {
 	database := client.Database(mongoConfig.Database)
 	productCollection := database.Collection(mongoConfig.Collection["product"])
 	orderCollection := database.Collection(mongoConfig.Collection["order"])
-	service := MongoDb{
+	service := MongoService{
 		orderCollection, productCollection,
 	}
 	return &service

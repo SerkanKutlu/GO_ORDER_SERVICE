@@ -2,20 +2,27 @@ package handler
 
 import (
 	"github.com/SerkanKutlu/orderService/config"
-	"github.com/SerkanKutlu/orderService/dataservice"
+	"github.com/SerkanKutlu/orderService/model"
 	"github.com/SerkanKutlu/orderService/pkg/rabbit"
+	"github.com/SerkanKutlu/orderService/repository/mongodb"
 )
 
-type DataAccessService struct {
-	OrderService   dataservice.OrderDataInterface
-	ProductService dataservice.ProductDataInterface
-	RabbitClient   *rabbit.Client
+type OrderService struct {
+	MongoService *mongodb.MongoService
+	//OrderService   repository.IOrderRepository
+	//ProductService repository.IProductRepository
+	RabbitClient *rabbit.Client
+}
+type GenericRepository struct {
+	GenericOrder   *mongodb.GenericRepository[model.Order]
+	GenericProduct *mongodb.GenericRepository[model.Product]
 }
 
-var dataAccessService = new(DataAccessService)
+var genericRepository *GenericRepository
+var dataAccessService = new(OrderService)
 var rabbitClient *rabbit.Client
 
-func GetDataServices(env string) *DataAccessService {
+func GetDataServices(env string) *OrderService {
 	if rabbitClient != nil {
 		dataAccessService.RabbitClient = rabbitClient
 		return dataAccessService
@@ -28,11 +35,21 @@ func GetDataServices(env string) *DataAccessService {
 	dataAccessService.RabbitClient = rabbitClient
 	return dataAccessService
 }
-
-func SetOrderDataService(orderService dataservice.OrderDataInterface) {
-	dataAccessService.OrderService = orderService
+func SetDataServices(mongoService *mongodb.MongoService) {
+	dataAccessService.MongoService = mongoService
+	genericRepository = new(GenericRepository)
+	genericRepository.GenericOrder = &mongodb.GenericRepository[model.Order]{
+		Collection: mongoService.Orders,
+	}
+	genericRepository.GenericProduct = &mongodb.GenericRepository[model.Product]{
+		Collection: mongoService.Products,
+	}
 }
 
-func SetProductDataService(productService dataservice.ProductDataInterface) {
-	dataAccessService.ProductService = productService
-}
+//func SetOrderDataService(orderService repository.IOrderRepository) {
+//	dataAccessService.OrderService = orderService
+//}
+//
+//func SetProductDataService(productService repository.IProductRepository) {
+//	dataAccessService.ProductService = productService
+//}

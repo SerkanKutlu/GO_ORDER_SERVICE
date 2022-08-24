@@ -2,7 +2,7 @@ package config
 
 type ApplicationConfig struct {
 	Rabbit RabbitConfig `yaml:"rabbit"`
-	Mongo  MongoConfig  `yaml:"mongodb"`
+	Mongo  MongoConfig  `yaml:"mongo"`
 }
 type RabbitConfig struct {
 	Host           string `yaml:"host"`

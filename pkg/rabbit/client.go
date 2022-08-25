@@ -15,7 +15,7 @@ type Client struct {
 	Channel      *amqp.Channel
 	QueueConfig  *config.QueueConfig
 	RabbitConfig *config.RabbitConfig
-	connected    bool
+	Connected    bool
 }
 
 func (client *Client) PublishAtCreated(message *events.OrderCreated) *customerror.CustomError {
@@ -25,7 +25,7 @@ func (client *Client) PublishAtCreated(message *events.OrderCreated) *customerro
 	if err != nil {
 		return customerror.InternalServerError
 	}
-	if client.connected == false {
+	if client.Connected == false {
 		if err := client.reConnect(); err != nil {
 			return err
 		}
@@ -46,7 +46,7 @@ func (client *Client) PublishAtUpdated(message *events.OrderUpdated) *customerro
 	if err != nil {
 		return customerror.InternalServerError
 	}
-	if client.connected == false {
+	if client.Connected == false {
 		if err := client.reConnect(); err != nil {
 			return err
 		}
@@ -73,7 +73,7 @@ func NewRabbitClient(rabbitConfig config.RabbitConfig, queueConfig config.QueueC
 	channel := createChannel(connection)
 	client.Connection = connection
 	client.Channel = channel
-	client.connected = true
+	client.Connected = true
 	client.setAllConfigurations()
 	return client
 }
@@ -86,7 +86,7 @@ func (client *Client) reConnect() *customerror.CustomError {
 	newChannel := createChannel(newConnection)
 	client.Connection = newConnection
 	client.Channel = newChannel
-	client.connected = true
+	client.Connected = true
 	return nil
 }
 
@@ -141,7 +141,7 @@ func (client *Client) createConnection(rabbitConfig config.RabbitConfig) (*amqp.
 	go func() {
 		<-connection.NotifyClose(make(chan *amqp.Error))
 		fmt.Println("Connection is down. Will be tried to be reconnected")
-		client.connected = false
+		client.Connected = false
 
 	}()
 	fmt.Println("Rabbit connection is done")

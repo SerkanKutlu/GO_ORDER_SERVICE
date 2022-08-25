@@ -26,7 +26,7 @@ func (client *Client) PublishAtCreated(message *events.OrderCreated) *customerro
 		return customerror.InternalServerError
 	}
 	if client.Connected == false {
-		if err := client.reConnect(); err != nil {
+		if err := client.ReConnect(); err != nil {
 			return err
 		}
 	}
@@ -47,7 +47,7 @@ func (client *Client) PublishAtUpdated(message *events.OrderUpdated) *customerro
 		return customerror.InternalServerError
 	}
 	if client.Connected == false {
-		if err := client.reConnect(); err != nil {
+		if err := client.ReConnect(); err != nil {
 			return err
 		}
 	}
@@ -78,7 +78,7 @@ func NewRabbitClient(rabbitConfig config.RabbitConfig, queueConfig config.QueueC
 	return client
 }
 
-func (client *Client) reConnect() *customerror.CustomError {
+func (client *Client) ReConnect() *customerror.CustomError {
 	newConnection, err := client.createConnection(*client.RabbitConfig)
 	if err != nil {
 		return err

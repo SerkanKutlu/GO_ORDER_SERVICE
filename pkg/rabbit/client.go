@@ -5,61 +5,89 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/SerkanKutlu/orderService/config"
+	"github.com/SerkanKutlu/orderService/customerror"
 	"github.com/SerkanKutlu/orderService/events"
 	amqp "github.com/rabbitmq/amqp091-go"
-	"time"
 )
 
 type Client struct {
-	Connection  *amqp.Connection
-	Channel     *amqp.Channel
-	QueueConfig *config.QueueConfig
+	Connection   *amqp.Connection
+	Channel      *amqp.Channel
+	QueueConfig  *config.QueueConfig
+	RabbitConfig *config.RabbitConfig
+	connected    bool
 }
 
-func (client *Client) PublishAtCreated(message *events.OrderCreated) error {
+func (client *Client) PublishAtCreated(message *events.OrderCreated) *customerror.CustomError {
 	exchangeName := client.QueueConfig.Order.OrderCreated.Exchange
 	routingKey := client.QueueConfig.Order.OrderCreated.RoutingKey
 	byteBody, err := json.Marshal(message)
 	if err != nil {
-		return err
+		return customerror.InternalServerError
+	}
+	if client.connected == false {
+		if err := client.reConnect(); err != nil {
+			return err
+		}
 	}
 	err = client.Channel.PublishWithContext(context.Background(), exchangeName, routingKey, false, false, amqp.Publishing{
 		ContentType: "text/plain",
 		Body:        byteBody,
 	})
 	if err != nil {
-		return err
+		return customerror.InternalServerError
 	}
 	return nil
 }
-func (client *Client) PublishAtUpdated(message *events.OrderUpdated) error {
+func (client *Client) PublishAtUpdated(message *events.OrderUpdated) *customerror.CustomError {
 	exchangeName := client.QueueConfig.Order.OrderUpdated.Exchange
 	routingKey := client.QueueConfig.Order.OrderUpdated.RoutingKey
 	byteBody, err := json.Marshal(message)
 	if err != nil {
-		return err
+		return customerror.InternalServerError
+	}
+	if client.connected == false {
+		if err := client.reConnect(); err != nil {
+			return err
+		}
 	}
 	err = client.Channel.PublishWithContext(context.Background(), exchangeName, routingKey, false, false, amqp.Publishing{
 		ContentType: "text/plain",
 		Body:        byteBody,
 	})
 	if err != nil {
-		return err
+		return customerror.InternalServerError
 	}
 	return nil
 }
 
 func NewRabbitClient(rabbitConfig config.RabbitConfig, queueConfig config.QueueConfig) *Client {
-	connection := createConnection(rabbitConfig)
-	channel := createChannel(connection)
 	client := &Client{
-		Connection:  connection,
-		Channel:     channel,
-		QueueConfig: &queueConfig,
+		QueueConfig:  &queueConfig,
+		RabbitConfig: &rabbitConfig,
 	}
-
+	connection, err := client.createConnection(rabbitConfig)
+	if err != nil {
+		panic("Rabbit mq client could not be created")
+	}
+	channel := createChannel(connection)
+	client.Connection = connection
+	client.Channel = channel
+	client.connected = true
 	client.setAllConfigurations()
 	return client
+}
+
+func (client *Client) reConnect() *customerror.CustomError {
+	newConnection, err := client.createConnection(*client.RabbitConfig)
+	if err != nil {
+		return err
+	}
+	newChannel := createChannel(newConnection)
+	client.Connection = newConnection
+	client.Channel = newChannel
+	client.connected = true
+	return nil
 }
 
 //Creating channel, declare queues and exchanges, binding.
@@ -99,9 +127,8 @@ func bindQueue(channel *amqp.Channel, queueConfig config.Queue) {
 	}
 }
 
-func createConnection(rabbitConfig config.RabbitConfig) *amqp.Connection {
+func (client *Client) createConnection(rabbitConfig config.RabbitConfig) (*amqp.Connection, *customerror.CustomError) {
 	amqpConfig := amqp.Config{
-		Heartbeat: 30 * time.Second,
 		Properties: amqp.Table{
 			"connection_name": rabbitConfig.ConnectionName,
 		},
@@ -109,13 +136,18 @@ func createConnection(rabbitConfig config.RabbitConfig) *amqp.Connection {
 	connectionUrl := getConnectionUrl(rabbitConfig)
 	connection, err := amqp.DialConfig(connectionUrl, amqpConfig)
 	if err != nil {
-		_ = connection.Close()
-		panic("Rabbit mq connection failed")
+		return nil, customerror.InternalServerError
 	}
+	go func() {
+		<-connection.NotifyClose(make(chan *amqp.Error))
+		fmt.Println("Connection is down. Will be tried to be reconnected")
+		client.connected = false
+
+	}()
 	fmt.Println("Rabbit connection is done")
 	//Listening rabbit connection errors
 
-	return connection
+	return connection, nil
 }
 
 func (client *Client) CloseConnection() {

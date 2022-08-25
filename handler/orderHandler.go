@@ -78,8 +78,7 @@ func (ds *OrderService) PostOrder(c echo.Context) error {
 	var event = new(events.OrderCreated)
 	event.FillCreated(newOrder)
 	if err := ds.RabbitClient.PublishAtCreated(event); err != nil {
-		errorMessage := customerror.NewError(err.Error(), 500)
-		return c.JSON(errorMessage.StatusCode, errorMessage)
+		return c.JSON(err.StatusCode, err)
 	}
 
 	//Return
@@ -134,8 +133,7 @@ func (ds *OrderService) PutOrder(c echo.Context) error {
 	var event = new(events.OrderUpdated)
 	event.FillUpdated(updatedOrder)
 	if err := ds.RabbitClient.PublishAtUpdated(event); err != nil {
-		errorMessage := customerror.NewError(err.Error(), 500)
-		return c.JSON(errorMessage.StatusCode, errorMessage)
+		return c.JSON(err.StatusCode, err)
 	}
 	return c.JSON(200, "")
 

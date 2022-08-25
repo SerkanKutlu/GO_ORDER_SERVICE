@@ -3,6 +3,7 @@ package rabbit
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/SerkanKutlu/orderService/config"
 	"github.com/SerkanKutlu/orderService/customerror"
@@ -16,6 +17,7 @@ type Client struct {
 	QueueConfig  *config.QueueConfig
 	RabbitConfig *config.RabbitConfig
 	Connected    bool
+	ErrorChannel chan error
 }
 
 func (client *Client) PublishAtCreated(message *events.OrderCreated) *customerror.CustomError {
@@ -24,11 +26,6 @@ func (client *Client) PublishAtCreated(message *events.OrderCreated) *customerro
 	byteBody, err := json.Marshal(message)
 	if err != nil {
 		return customerror.InternalServerError
-	}
-	if client.Connected == false {
-		if err := client.ReConnect(); err != nil {
-			return err
-		}
 	}
 	err = client.Channel.PublishWithContext(context.Background(), exchangeName, routingKey, false, false, amqp.Publishing{
 		ContentType: "text/plain",
@@ -45,11 +42,6 @@ func (client *Client) PublishAtUpdated(message *events.OrderUpdated) *customerro
 	byteBody, err := json.Marshal(message)
 	if err != nil {
 		return customerror.InternalServerError
-	}
-	if client.Connected == false {
-		if err := client.ReConnect(); err != nil {
-			return err
-		}
 	}
 	err = client.Channel.PublishWithContext(context.Background(), exchangeName, routingKey, false, false, amqp.Publishing{
 		ContentType: "text/plain",
@@ -70,10 +62,11 @@ func NewRabbitClient(rabbitConfig config.RabbitConfig, queueConfig config.QueueC
 	if err != nil {
 		panic("Rabbit mq client could not be created")
 	}
-	channel := createChannel(connection)
+	channel := client.createChannel(connection)
 	client.Connection = connection
 	client.Channel = channel
 	client.Connected = true
+	client.ErrorChannel = make(chan error)
 	client.setAllConfigurations()
 	return client
 }
@@ -83,7 +76,7 @@ func (client *Client) ReConnect() *customerror.CustomError {
 	if err != nil {
 		return err
 	}
-	newChannel := createChannel(newConnection)
+	newChannel := client.createChannel(newConnection)
 	client.Connection = newConnection
 	client.Channel = newChannel
 	client.Connected = true
@@ -100,11 +93,20 @@ func (client *Client) setAllConfigurations() {
 	}
 }
 
-func createChannel(connection *amqp.Connection) *amqp.Channel {
+func (client *Client) createChannel(connection *amqp.Connection) *amqp.Channel {
 	channel, err := connection.Channel()
 	if err != nil {
 		panic("Rabbit channel creation error: " + err.Error())
 	}
+	go func() {
+		<-client.ErrorChannel
+		fmt.Println("Retrying to connect rabbit mq")
+		connectionError := customerror.InternalServerError
+		for connectionError != nil {
+			connectionError = client.ReConnect() //burası bloklama yapıyor mu onu dene.
+		}
+
+	}()
 	return channel
 }
 
@@ -140,13 +142,12 @@ func (client *Client) createConnection(rabbitConfig config.RabbitConfig) (*amqp.
 	}
 	go func() {
 		<-connection.NotifyClose(make(chan *amqp.Error))
+		client.ErrorChannel <- errors.New("rabbit connection is down")
 		fmt.Println("Connection is down. Will be tried to be reconnected")
 		client.Connected = false
-
 	}()
-	fmt.Println("Rabbit connection is done")
-	//Listening rabbit connection errors
 
+	fmt.Println("Rabbit connection is done")
 	return connection, nil
 }
 

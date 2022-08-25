@@ -33,6 +33,7 @@ func SetOrderRepository(mongoService *mongodb.MongoService) {
 func SetRabbitClient(rabbitConfig config.RabbitConfig, queueConfig config.QueueConfig) {
 	orderService.RabbitClient = new(rabbit.Client)
 	orderService.RabbitClient = rabbit.NewRabbitClient(rabbitConfig, queueConfig)
+	orderService.RabbitClient.EnsureConnection()
 }
 
 func SetHttpClient(remoteServers config.RemoteServicesConfig) {

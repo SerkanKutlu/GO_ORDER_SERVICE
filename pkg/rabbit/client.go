@@ -27,6 +27,15 @@ func (client *Client) PublishAtCreated(message *events.OrderCreated) *customerro
 	if err != nil {
 		return customerror.InternalServerError
 	}
+	go func() {
+		<-client.ErrorChannel
+		fmt.Println("Retrying to connect rabbit mq")
+		connectionError := customerror.InternalServerError
+		for connectionError != nil {
+			connectionError = client.ReConnect() //burası bloklama yapıyor mu onu dene.
+		}
+
+	}()
 	err = client.Channel.PublishWithContext(context.Background(), exchangeName, routingKey, false, false, amqp.Publishing{
 		ContentType: "text/plain",
 		Body:        byteBody,
@@ -47,6 +56,15 @@ func (client *Client) PublishAtUpdated(message *events.OrderUpdated) *customerro
 		ContentType: "text/plain",
 		Body:        byteBody,
 	})
+	go func() {
+		<-client.ErrorChannel
+		fmt.Println("Retrying to connect rabbit mq")
+		connectionError := customerror.InternalServerError
+		for connectionError != nil {
+			connectionError = client.ReConnect() //burası bloklama yapıyor mu onu dene.
+		}
+
+	}()
 	if err != nil {
 		return customerror.InternalServerError
 	}
@@ -98,15 +116,7 @@ func (client *Client) createChannel(connection *amqp.Connection) *amqp.Channel {
 	if err != nil {
 		panic("Rabbit channel creation error: " + err.Error())
 	}
-	go func() {
-		<-client.ErrorChannel
-		fmt.Println("Retrying to connect rabbit mq")
-		connectionError := customerror.InternalServerError
-		for connectionError != nil {
-			connectionError = client.ReConnect() //burası bloklama yapıyor mu onu dene.
-		}
 
-	}()
 	return channel
 }
 

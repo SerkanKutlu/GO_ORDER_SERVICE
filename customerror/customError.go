@@ -1,11 +1,11 @@
 package customerror
 
 type CustomError struct {
-	Message    string
+	Message    any
 	StatusCode int
 }
 
-func NewError(message string, code int) *CustomError {
+func NewError(message any, code int) *CustomError {
 	return &CustomError{
 		message, code,
 	}

@@ -4,6 +4,7 @@ import (
 	"github.com/SerkanKutlu/orderService/config"
 	"github.com/SerkanKutlu/orderService/controller"
 	"github.com/SerkanKutlu/orderService/handler"
+	"github.com/SerkanKutlu/orderService/middleware"
 	"github.com/SerkanKutlu/orderService/repository/mongodb"
 	"github.com/labstack/echo/v4"
 	"os"
@@ -34,6 +35,7 @@ func main() {
 	orderController := controller.GetOrderController(orderService)
 	productController := controller.GetProductController(orderService)
 	e := echo.New()
+	e.Use(middleware.ErrorHandler)
 	//Order Controls
 	e.GET("/api/order", orderController.GetAllOrders)
 	e.GET("/api/order/:id", orderController.GetByIdOrder)

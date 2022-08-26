@@ -36,7 +36,7 @@ func (ms *MongoService) UpdateStatusFieldOrder(id string, newStatus string) *cus
 		return customerror.InternalServerError
 	}
 	if result.ModifiedCount == 0 {
-		return customerror.OrderNotFoundError
+		return customerror.NotFoundError
 	}
 	return nil
 }
@@ -47,7 +47,7 @@ func (ms *MongoService) DeleteOrdersOfCustomer(customerId string) *customerror.C
 		return customerror.InternalServerError
 	}
 	if result.DeletedCount == 0 {
-		return customerror.OrderNotFoundError
+		return customerror.NotFoundError
 	}
 	return nil
 }

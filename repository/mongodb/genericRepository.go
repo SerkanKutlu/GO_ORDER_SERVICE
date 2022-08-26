@@ -41,7 +41,7 @@ func (gc *GenericCollection[T]) FindById(id string) (*T, *customerror.CustomErro
 	var entity T
 	err := gc.Collection.FindOne(context.Background(), filter).Decode(&entity)
 	if err != nil {
-		return nil, customerror.OrderNotFoundError
+		return nil, customerror.NotFoundError
 	}
 	return &entity, nil
 }
@@ -58,7 +58,7 @@ func (gc *GenericCollection[T]) Update(entity *T, entityId string) *customerror.
 		return customerror.InternalServerError
 	}
 	if result.MatchedCount == 0 {
-		return customerror.OrderNotFoundError
+		return customerror.NotFoundError
 	}
 	return nil
 }
@@ -68,7 +68,7 @@ func (gc *GenericCollection[T]) Delete(id string) *customerror.CustomError {
 		return customerror.InternalServerError
 	}
 	if result.DeletedCount == 0 {
-		return customerror.OrderNotFoundError
+		return customerror.NotFoundError
 	}
 	return nil
 }

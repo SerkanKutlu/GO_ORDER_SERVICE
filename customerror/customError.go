@@ -12,7 +12,7 @@ func NewError(message string, code int) *CustomError {
 }
 
 var (
-	OrderNotFoundError = &CustomError{
+	NotFoundError = &CustomError{
 		Message:    "Order not found",
 		StatusCode: 404,
 	}
@@ -30,10 +30,6 @@ var (
 	}
 	AddressNotFoundError = &CustomError{
 		Message:    "Customer does not have a address",
-		StatusCode: 404,
-	}
-	ProductNotFoundError = &CustomError{
-		Message:    "Product not found",
 		StatusCode: 404,
 	}
 )

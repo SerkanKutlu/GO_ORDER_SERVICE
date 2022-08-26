@@ -4,47 +4,39 @@ import (
 	"github.com/SerkanKutlu/orderService/customerror"
 	"github.com/SerkanKutlu/orderService/dto"
 	"github.com/SerkanKutlu/orderService/events"
+	"github.com/SerkanKutlu/orderService/model"
 	"github.com/go-playground/validator/v10"
-	"github.com/labstack/echo/v4"
 )
 
-func (ds *OrderService) GetAllOrders(c echo.Context) error {
+func (ds *OrderService) GetAllOrders() (*[]model.Order, *customerror.CustomError) {
 	orders, err := ds.GenericRepository.GenericOrder.FindAll()
 	if err != nil {
-		return c.JSON(500, err)
+		return nil, err
 	}
-	return c.JSON(200, orders)
+	return orders, nil
 }
 
-func (ds *OrderService) GetByIdOrder(c echo.Context) error {
-	id := c.Param("id")
+func (ds *OrderService) GetByIdOrder(id string) (*model.Order, *customerror.CustomError) {
 	order, err := ds.GenericRepository.GenericOrder.FindById(id)
 	if err != nil {
-		return c.JSON(err.StatusCode, err)
+		return nil, err
 	}
-	return c.JSON(200, order)
+	return order, nil
 }
 
-func (ds *OrderService) GetOrdersOfCustomers(c echo.Context) error {
-	customerId := c.Param("id")
+func (ds *OrderService) GetOrdersOfCustomer(customerId string) (*[]model.Order, *customerror.CustomError) {
 	orders, err := ds.MongoService.FindOrdersOfCustomer(customerId)
 	if err != nil {
-		return c.JSON(err.StatusCode, err)
+		return nil, err
 	}
-	return c.JSON(200, orders)
+	return orders, nil
 }
 
-func (ds *OrderService) PostOrder(c echo.Context) error {
-	var orderDto dto.OrderForCreationDto
-	//Binding
-	if err := c.Bind(&orderDto); err != nil {
-		return c.JSON(customerror.InvalidBodyError.StatusCode, customerror.InvalidBodyError)
-	}
-
+func (ds *OrderService) PostOrder(orderDto *dto.OrderForCreationDto) (*string, *customerror.CustomError) {
 	//Validation
 	if err := validator.New().Struct(orderDto); err != nil {
 		customError := customerror.NewError(err.Error(), 400)
-		return c.JSON(customError.StatusCode, customError)
+		return nil, customError
 	}
 	//Dto to Order after validation passed
 	newOrder := orderDto.ToOrder()
@@ -52,7 +44,7 @@ func (ds *OrderService) PostOrder(c echo.Context) error {
 	//CustomerCheck and Address assignment
 	address, err := ds.HttpClient.GetCustomerAddress(newOrder.CustomerId)
 	if err != nil {
-		return c.JSON(err.StatusCode, err)
+		return nil, err
 	}
 	newOrder.Address = *address
 
@@ -62,7 +54,7 @@ func (ds *OrderService) PostOrder(c echo.Context) error {
 		product, err := ds.GenericRepository.GenericProduct.FindById(p)
 		if err != nil {
 			customErr := customerror.NewError("Product with id: "+p+" not found", 404)
-			return c.JSON(customErr.StatusCode, customErr)
+			return nil, customErr
 		}
 		total += product.Price
 	}
@@ -71,32 +63,26 @@ func (ds *OrderService) PostOrder(c echo.Context) error {
 
 	//Insert to db
 	if err := ds.GenericRepository.GenericOrder.Insert(newOrder); err != nil {
-		return c.JSON(err.StatusCode, err)
+		return nil, err
 	}
 
 	//Publish to rabbit
 	var event = new(events.OrderCreated)
 	event.FillCreated(newOrder)
 	if err := ds.RabbitClient.PublishAtCreated(event); err != nil {
-		return c.JSON(err.StatusCode, err)
+		return nil, err
 	}
 
 	//Return
-	return c.JSON(201, newOrder.Id)
+	return &newOrder.Id, nil
 
 }
 
-func (ds *OrderService) PutOrder(c echo.Context) error {
-	var orderDto dto.OrderForUpdateDto
-	//Binding
-	if err := c.Bind(&orderDto); err != nil {
-		return c.JSON(customerror.InvalidBodyError.StatusCode, customerror.InvalidBodyError)
-	}
-
+func (ds *OrderService) PutOrder(orderDto *dto.OrderForUpdateDto) (*model.Order, *customerror.CustomError) {
 	//Validation
 	if err := validator.New().Struct(orderDto); err != nil {
 		customError := customerror.NewError(err.Error(), 400)
-		return c.JSON(customError.StatusCode, customError)
+		return nil, customError
 	}
 
 	//Product Check, Calculate total and quantity
@@ -105,7 +91,7 @@ func (ds *OrderService) PutOrder(c echo.Context) error {
 		product, err := ds.GenericRepository.GenericProduct.FindById(p)
 		if err != nil {
 			customErr := customerror.NewError("Product with id: "+product.Id+" not found", 404)
-			return c.JSON(customErr.StatusCode, customErr)
+			return nil, customErr
 		}
 		total += product.Price
 	}
@@ -117,7 +103,7 @@ func (ds *OrderService) PutOrder(c echo.Context) error {
 	//Set createdAt field
 	oldOrder, err := ds.GenericRepository.GenericOrder.FindById(updatedOrder.Id)
 	if err != nil {
-		return c.JSON(err.StatusCode, err)
+		return nil, err
 	}
 	updatedOrder.CreatedAt = oldOrder.CreatedAt
 
@@ -126,45 +112,38 @@ func (ds *OrderService) PutOrder(c echo.Context) error {
 
 	//Update order
 	if err := ds.GenericRepository.GenericOrder.Update(updatedOrder, updatedOrder.Id); err != nil {
-		return c.JSON(err.StatusCode, err)
+		return nil, err
 	}
 
 	//Publish to rabbit
 	var event = new(events.OrderUpdated)
 	event.FillUpdated(updatedOrder)
 	if err := ds.RabbitClient.PublishAtUpdated(event); err != nil {
-		return c.JSON(err.StatusCode, err)
+		return nil, err
 	}
-	return c.JSON(200, "")
+	return updatedOrder, nil
 
 }
 
-func (ds *OrderService) PutOrderStatus(c echo.Context) error {
-	id := c.Param("id")
-	status := c.Param("status")
-	if status == "" {
-		err := customerror.NewError("Status can not be empty", 400)
-		return c.JSON(err.StatusCode, err)
-	}
+func (ds *OrderService) PutOrderStatus(id string, status string) *customerror.CustomError {
 	if err := ds.MongoService.UpdateStatusFieldOrder(id, status); err != nil {
-		return c.JSON(err.StatusCode, err)
+		return err
 	}
-	return c.JSON(200, "")
+	return nil
 }
 
-func (ds *OrderService) DeleteOrder(c echo.Context) error {
-	id := c.Param("id")
+func (ds *OrderService) DeleteOrder(id string) *customerror.CustomError {
 	if err := ds.GenericRepository.GenericOrder.Delete(id); err != nil {
-		return c.JSON(err.StatusCode, err)
+		return err
 	}
-	return c.JSON(200, "")
+	return nil
 }
 
-func (ds *OrderService) DeleteOrdersOfCustomer(c echo.Context) error {
-	customerId := c.Param("id")
+func (ds *OrderService) DeleteOrdersOfCustomer(customerId string) *customerror.CustomError {
+
 	if err := ds.MongoService.DeleteOrdersOfCustomer(customerId); err != nil {
-		return c.JSON(err.StatusCode, err)
+		return err
 	}
-	return c.JSON(200, "")
+	return nil
 
 }

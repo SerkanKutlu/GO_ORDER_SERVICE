@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/SerkanKutlu/orderService/config"
+	"github.com/SerkanKutlu/orderService/controller"
 	"github.com/SerkanKutlu/orderService/handler"
 	"github.com/SerkanKutlu/orderService/repository/mongodb"
 	"github.com/labstack/echo/v4"
@@ -30,23 +31,24 @@ func main() {
 
 	//Getting Order Service that will be used at handler methods.
 	orderService := handler.GetOrderService()
-
+	orderController := controller.GetOrderController(orderService)
+	productController := controller.GetProductController(orderService)
 	e := echo.New()
 	//Order Controls
-	e.GET("/api/order", orderService.GetAllOrders)
-	e.GET("/api/order/:id", orderService.GetByIdOrder)
-	e.GET("/api/order/customer/:id", orderService.GetOrdersOfCustomers)
-	e.POST("/api/order", orderService.PostOrder)
-	e.PUT("/api/order", orderService.PutOrder)
-	e.PUT("/api/order/status/:id/:status", orderService.PutOrderStatus)
-	e.DELETE("/api/order/:id", orderService.DeleteOrder)
-	e.DELETE("/api/order/customer/:id", orderService.DeleteOrdersOfCustomer)
+	e.GET("/api/order", orderController.GetAllOrders)
+	e.GET("/api/order/:id", orderController.GetByIdOrder)
+	e.GET("/api/order/customer/:id", orderController.GetOrdersOfCustomer)
+	e.POST("/api/order", orderController.PostOrder)
+	e.PUT("/api/order", orderController.PutOrder)
+	e.PUT("/api/order/status/:id/:status", orderController.PutOrderStatus)
+	e.DELETE("/api/order/:id", orderController.DeleteOrder)
+	e.DELETE("/api/order/customer/:id", orderController.DeleteOrdersOfCustomer)
 	//Product Controls
-	e.GET("/api/product", orderService.GetAllProducts)
-	e.DELETE("/api/product/:id", orderService.DeleteProduct)
-	e.GET("/api/product/:id", orderService.GetByIdProduct)
-	e.POST("/api/product", orderService.PostProduct)
-	e.PUT("/api/product", orderService.PutProduct)
+	e.GET("/api/product", productController.GetAllProducts)
+	e.DELETE("/api/product/:id", productController.DeleteProduct)
+	e.GET("/api/product/:id", productController.GetByIdProduct)
+	e.POST("/api/product", productController.PostProduct)
+	e.PUT("/api/product", productController.PutProduct)
 	err := e.Start(":9000")
 	if err != nil {
 		panic(err)

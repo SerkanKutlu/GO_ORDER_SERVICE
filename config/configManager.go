@@ -8,6 +8,7 @@ type configurationManager struct {
 	applicationConfig    *ApplicationConfig
 	queuesConfig         *QueueConfig
 	remoteServicesConfig *RemoteServicesConfig
+	topicConfig          *TopicConfig
 }
 
 func NewConfigurationManager(path string, file string, env string) *configurationManager {
@@ -16,17 +17,21 @@ func NewConfigurationManager(path string, file string, env string) *configuratio
 	appConfig := readApplicationConfigFile(env, file)
 	queueConfig := readQueuesConfigFile(env, file)
 	remoteServerConfig := readRemoteServicesConfigFile(env, file)
+	topicConfig := readKafkaTopicsConfigFile(env, file)
 	return &configurationManager{
 		applicationConfig:    appConfig,
 		queuesConfig:         queueConfig,
 		remoteServicesConfig: remoteServerConfig,
+		topicConfig:          topicConfig,
 	}
 }
 
 func (cm *configurationManager) GetRabbitConfiguration() *RabbitConfig {
 	return &cm.applicationConfig.Rabbit
 }
-
+func (cm *configurationManager) GetKafkaConfiguration() *KafkaConfig {
+	return &cm.applicationConfig.Kafka
+}
 func (cm *configurationManager) GetMongoConfiguration() *MongoConfig {
 	return &cm.applicationConfig.Mongo
 }
@@ -38,12 +43,14 @@ func (cm *configurationManager) GetQueuesConfiguration() *QueueConfig {
 func (cm *configurationManager) GetRemoteServerConfiguration() *RemoteServicesConfig {
 	return cm.remoteServicesConfig
 }
-
+func (cm *configurationManager) GetKafkaTopicConfiguration() *TopicConfig {
+	return cm.topicConfig
+}
 func readApplicationConfigFile(env string, file string) *ApplicationConfig {
 
 	viper.SetConfigName(file)
 	if err := viper.ReadInConfig(); err != nil {
-		panic("Can not load application config file")
+		panic("Can not load application config file 1")
 	}
 	var appConfig ApplicationConfig
 	envSub := viper.Sub(env)
@@ -75,4 +82,16 @@ func readRemoteServicesConfigFile(env string, file string) *RemoteServicesConfig
 		panic(err.Error())
 	}
 	return &remoteConfig
+}
+func readKafkaTopicsConfigFile(env string, file string) *TopicConfig {
+	viper.SetConfigName(file)
+	if err := viper.ReadInConfig(); err != nil {
+		panic("Can not load application config file")
+	}
+	var topicConfig TopicConfig
+	envSub := viper.Sub(env)
+	if err := envSub.Unmarshal(&topicConfig); err != nil {
+		panic(err.Error())
+	}
+	return &topicConfig
 }

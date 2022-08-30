@@ -3,6 +3,7 @@ package config
 type ApplicationConfig struct {
 	Rabbit RabbitConfig `yaml:"rabbit"`
 	Mongo  MongoConfig  `yaml:"mongo"`
+	Kafka  KafkaConfig  `yaml:"kafka"`
 }
 type RabbitConfig struct {
 	Host           string `yaml:"host"`
@@ -17,4 +18,8 @@ type MongoConfig struct {
 	ConnectionString string            `yaml:"connectionString"`
 	Database         string            `yaml:"database"`
 	Collection       map[string]string `yaml:"collection"`
+}
+
+type KafkaConfig struct {
+	ConfigMap map[string]string `yaml:"configMap"`
 }

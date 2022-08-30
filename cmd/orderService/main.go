@@ -7,12 +7,12 @@ import (
 	"github.com/SerkanKutlu/orderService/middleware"
 	"github.com/SerkanKutlu/orderService/repository/mongodb"
 	"github.com/labstack/echo/v4"
-	"os"
 )
 
 func main() {
-	env := os.Getenv("GO_ENV")
-	confManager := config.NewConfigurationManager("./yml", "application", env)
+	//env := os.Getenv("GO_ENV")
+	env := "dev"
+	confManager := config.NewConfigurationManager("/mnt/c/Users/kutlu/Desktop/WORK/TESODEV/TESODEV_EDU/Repos/edu_src_Go/orderService/yml", "application", env)
 	//Getting Mongo Configurations
 	mongoConfig := confManager.GetMongoConfiguration()
 	//Getting Mongo Service
@@ -30,6 +30,11 @@ func main() {
 	//Setting Http Client
 	handler.SetHttpClient(*remoteServerConfiguration)
 
+	//Getting Kafka Configurations
+	kafkaConfig := confManager.GetKafkaConfiguration()
+	topicConfig := confManager.GetKafkaTopicConfiguration()
+	//Setting Kafka Client
+	handler.SetKafkaClient(*kafkaConfig, *topicConfig)
 	//Getting Order Service that will be used at handler methods.
 	orderService := handler.GetOrderService()
 	orderController := controller.GetOrderController(orderService)

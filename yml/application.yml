@@ -10,6 +10,13 @@ dev:
     connectionString : "mongodb://root:155202Asd...@localhost:27017"
     database :  "NewOrderDb"
     collection : {"Order" : "NewOrders" , "Product": "NewProducts"}
+  kafka:
+    configMap: {"server":"pkc-6ojv2.us-west4.gcp.confluent.cloud:9092", "acks" : "all"}
+  orderKafka:
+    orderCreated:
+      topic: "orderCreatedTopic"
+    orderUpdated:
+      topic: "orderUpdatedTopic"
   order:
     orderCreated:
       exchange: "orderExchange"

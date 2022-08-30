@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"errors"
 	"github.com/SerkanKutlu/orderService/customerror"
 	"github.com/SerkanKutlu/orderService/dto"
 	"github.com/SerkanKutlu/orderService/handler"
@@ -17,6 +18,7 @@ func GetOrderController(orderService *handler.OrderService) *OrderController {
 }
 
 func (controller *OrderController) GetAllOrders(c echo.Context) error {
+	return errors.New("serkan")
 	orders, err := controller.Controller.OrderService.GetAllOrders()
 	if err != nil {
 		return c.JSON(500, err)

@@ -52,10 +52,11 @@ func (client *Client) CreateProducer() (*kafka.Producer, *customerror.CustomErro
 }
 
 func (client *Client) CreateConsumer() (*kafka.Consumer, *customerror.CustomError) {
-	producer, err := kafka.NewConsumer(&client.ConsumerConfig)
+	consumer, err := kafka.NewConsumer(&client.ConsumerConfig)
 	if err != nil {
 		customError := customerror.NewError(err.Error(), 500)
 		return nil, customError
 	}
-	return producer, nil
+	consumer.Subscribe(client.TopicConfig.OrderKafka.OrderCreated.Topic, nil)
+	return consumer, nil
 }

@@ -31,11 +31,11 @@ func NewKafkaClient(kafkaConfig config.KafkaConfig, kafkaTopicConfig *config.Top
 		panic(err)
 	}
 	client.Producer = producer
-	//consumer, err := client.CreateConsumer()
-	//if err != nil {
-	//	panic(err)
-	//}
-	//client.Consumer = consumer
+	consumer, err := client.CreateConsumer()
+	if err != nil {
+		panic(err)
+	}
+	client.Consumer = consumer
 	return client
 
 }

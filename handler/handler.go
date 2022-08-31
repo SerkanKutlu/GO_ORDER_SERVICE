@@ -14,7 +14,7 @@ type OrderService struct {
 	RabbitClient      *rabbit.Client
 	GenericRepository *mongodb.GenericRepository
 	HttpClient        *utils.HttpClient
-	KafkaClient       *kafka.Client
+	KafkaClient       *kafkaPkg.Client
 }
 
 var orderService = new(OrderService)
@@ -45,6 +45,6 @@ func SetHttpClient(remoteServers config.RemoteServicesConfig) {
 }
 
 func SetKafkaClient(kafkaConfig config.KafkaConfig, topicConfig config.TopicConfig) {
-	orderService.KafkaClient = new(kafka.Client)
-	orderService.KafkaClient = kafka.NewKafkaClient(kafkaConfig, &topicConfig)
+	orderService.KafkaClient = new(kafkaPkg.Client)
+	orderService.KafkaClient = kafkaPkg.NewKafkaClient(kafkaConfig, &topicConfig)
 }

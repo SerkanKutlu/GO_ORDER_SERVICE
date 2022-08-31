@@ -11,7 +11,20 @@ dev:
     database :  "NewOrderDb"
     collection : {"Order" : "NewOrders" , "Product": "NewProducts"}
   kafka:
-    configMap: {"server":"pkc-6ojv2.us-west4.gcp.confluent.cloud:9092", "acks" : "all"}
+    producerConfig:
+      bootstrap.Servers: pkc-6ojv2.us-west4.gcp.confluent.cloud:9092
+      security.protocol: SASL_SSL
+      sasl.mechanisms: PLAIN
+      sasl.username: 76FIQJWEIZNK6KOB
+      sasl.password: KL3Nb9CaGum9fFXjguM1JgVRSO9AQ3CzY8sBWlO5e1lhfzIUDx+T0pb9DkkzYaNO
+    consumerConfig:
+      bootstrap.Servers: pkc-6ojv2.us-west4.gcp.confluent.cloud:9092
+      security.protocol: SASL_SSL
+      sasl.mechanisms: PLAIN
+      sasl.username: 76FIQJWEIZNK6KOB
+      sasl.password: KL3Nb9CaGum9fFXjguM1JgVRSO9AQ3CzY8sBWlO5e1lhfzIUDx+T0pb9DkkzYaNO
+      group.id: orderConsumers
+      auto.offset.reset: smallest
   orderKafka:
     orderCreated:
       topic: "orderCreatedTopic"

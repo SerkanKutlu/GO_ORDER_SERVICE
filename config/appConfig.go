@@ -21,5 +21,6 @@ type MongoConfig struct {
 }
 
 type KafkaConfig struct {
-	ConfigMap map[string]string `yaml:"configMap"`
+	ProducerConfig map[string]string `yaml:"producerConfig"`
+	ConsumerConfig map[string]string `yaml:"consumerConfig"`
 }

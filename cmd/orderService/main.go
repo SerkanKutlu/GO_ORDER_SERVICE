@@ -12,7 +12,7 @@ import (
 func main() {
 	//env := os.Getenv("GO_ENV")
 	env := "dev"
-	confManager := config.NewConfigurationManager("/mnt/c/Users/kutlu/Desktop/WORK/TESODEV/TESODEV_EDU/Repos/edu_src_Go/orderService/yml", "application", env)
+	confManager := config.NewConfigurationManager("../../yml", "application", env)
 	//Getting Mongo Configurations
 	mongoConfig := confManager.GetMongoConfiguration()
 	//Getting Mongo Service

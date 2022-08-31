@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"github.com/SerkanKutlu/orderService/customerror"
 	"github.com/SerkanKutlu/orderService/dto"
 	"github.com/SerkanKutlu/orderService/events"
@@ -34,16 +35,20 @@ func (ds *OrderService) GetOrdersOfCustomer(customerId string) (*[]model.Order, 
 
 func (ds *OrderService) PostOrder(orderDto *dto.OrderForCreationDto) (*string, *customerror.CustomError) {
 	//Validation
+	fmt.Println("post1")
 	if err := validator.New().Struct(orderDto); err != nil {
+		fmt.Println("post2")
 		customError := customerror.NewError(err.Error(), 400)
 		return nil, customError
 	}
 	//Dto to Order after validation passed
 	newOrder := orderDto.ToOrder()
-
+	fmt.Println("post3")
 	//CustomerCheck and Address assignment
 	address, err := ds.HttpClient.GetCustomerAddress(newOrder.CustomerId)
+	fmt.Println("post4")
 	if err != nil {
+		fmt.Println("http de patladi")
 		return nil, err
 	}
 	newOrder.Address = *address
@@ -67,12 +72,19 @@ func (ds *OrderService) PostOrder(orderDto *dto.OrderForCreationDto) (*string, *
 	}
 
 	//Publish to rabbit
+	fmt.Println("rabbite gidiyor")
 	var event = new(events.OrderCreated)
 	event.FillCreated(newOrder)
 	if err := ds.RabbitClient.PublishAtCreated(event); err != nil {
 		return nil, err
 	}
 
+	fmt.Println("kafkaya gidiyor")
+	//Publish to kafka
+	if err := ds.KafkaClient.PublishAtCreation(event); err != nil {
+		fmt.Println("kafkada sorun var")
+		return nil, err
+	}
 	//Return
 	return &newOrder.Id, nil
 
@@ -119,6 +131,13 @@ func (ds *OrderService) PutOrder(orderDto *dto.OrderForUpdateDto) (*model.Order,
 	var event = new(events.OrderUpdated)
 	event.FillUpdated(updatedOrder)
 	if err := ds.RabbitClient.PublishAtUpdated(event); err != nil {
+		return nil, err
+	}
+
+	fmt.Println("kafkaya gidiyor")
+	//Publish to kafka
+	if err := ds.KafkaClient.PublishAtUpdate(event); err != nil {
+		fmt.Println("kafkada sorun var")
 		return nil, err
 	}
 	return updatedOrder, nil

@@ -14,11 +14,21 @@ type HttpClient struct {
 }
 
 func (hc *HttpClient) GetCustomerAddress(customerId string) (*model.Address, *customerror.CustomError) {
+	for key, value := range hc.ServiceUrlMap {
+		fmt.Println("printing")
+		fmt.Println(key)
+		fmt.Println(value)
+	}
 	url := fmt.Sprintf("%s%s%s", hc.ServiceUrlMap["CustomerService"], "customers/", customerId)
+	fmt.Println(url)
 	resp, err := http.Get(url)
+	if resp == nil {
+		return nil, customerror.InternalServerError
+	}
 	if resp.StatusCode == 404 {
 		return nil, customerror.CustomerNotFoundError
 	}
+
 	var address *model.Order
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {

@@ -14,6 +14,7 @@ type configurationManager struct {
 func NewConfigurationManager(path string, file string, env string) *configurationManager {
 	viper.AddConfigPath(path)
 	viper.SetConfigType("yml")
+	//viper.KeyDelimiter(",")
 	appConfig := readApplicationConfigFile(env, file)
 	queueConfig := readQueuesConfigFile(env, file)
 	remoteServerConfig := readRemoteServicesConfigFile(env, file)

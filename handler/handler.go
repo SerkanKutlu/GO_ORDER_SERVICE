@@ -46,5 +46,5 @@ func SetHttpClient(remoteServers config.RemoteServicesConfig) {
 
 func SetKafkaClient(kafkaConfig config.KafkaConfig, topicConfig config.TopicConfig) {
 	orderService.KafkaClient = new(kafka.Client)
-	orderService.KafkaClient = kafka.NewKafkaClient(kafkaConfig, topicConfig)
+	orderService.KafkaClient = kafka.NewKafkaClient(kafkaConfig, &topicConfig)
 }

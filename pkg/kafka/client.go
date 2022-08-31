@@ -12,7 +12,7 @@ type Client struct {
 	ConsumerConfig kafka.ConfigMap
 	TopicConfig    *config.TopicConfig
 	Producer       *kafka.Producer
-	//Consumer    *kafka.Consumer
+	Consumer       *kafka.Consumer
 }
 
 func NewKafkaClient(kafkaConfig config.KafkaConfig, kafkaTopicConfig *config.TopicConfig) *Client {

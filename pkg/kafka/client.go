@@ -21,6 +21,8 @@ func NewKafkaClient(kafkaConfig config.KafkaConfig, kafkaTopicConfig *config.Top
 	client.ProducerConfig = make(map[string]kafka.ConfigValue)
 	client.ConsumerConfig = make(map[string]kafka.ConfigValue)
 	for key, value := range kafkaConfig.ProducerConfig {
+		fmt.Println(key)
+		fmt.Println(value)
 		client.ProducerConfig[key] = value
 	}
 	for key, value := range kafkaConfig.ConsumerConfig {

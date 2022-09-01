@@ -12,7 +12,7 @@ type Client struct {
 	ConsumerConfig kafka.ConfigMap
 	TopicConfig    *config.TopicConfig
 	Producer       *kafka.Producer
-	Consumer       *kafka.Consumer
+	Consumer       *[]kafka.Consumer
 }
 
 func NewKafkaClient(kafkaConfig config.KafkaConfig, kafkaTopicConfig *config.TopicConfig) *Client {
@@ -31,11 +31,6 @@ func NewKafkaClient(kafkaConfig config.KafkaConfig, kafkaTopicConfig *config.Top
 		panic(err)
 	}
 	client.Producer = producer
-	consumer, err := client.CreateConsumer()
-	if err != nil {
-		panic(err)
-	}
-	client.Consumer = consumer
 	return client
 
 }
@@ -51,12 +46,15 @@ func (client *Client) CreateProducer() (*kafka.Producer, *customerror.CustomErro
 	return producer, nil
 }
 
-func (client *Client) CreateConsumer() (*kafka.Consumer, *customerror.CustomError) {
+func (client *Client) CreateConsumer(topicName string) (*kafka.Consumer, *customerror.CustomError) {
 	consumer, err := kafka.NewConsumer(&client.ConsumerConfig)
 	if err != nil {
 		customError := customerror.NewError(err.Error(), 500)
 		return nil, customError
 	}
-	consumer.Subscribe(client.TopicConfig.OrderKafka.OrderCreated.Topic, nil)
+	if err := consumer.Subscribe(topicName, nil); err != nil {
+		customError := customerror.NewError(err.Error(), 500)
+		return nil, customError
+	}
 	return consumer, nil
 }

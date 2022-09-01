@@ -34,7 +34,9 @@ func main() {
 	kafkaConfig := confManager.GetKafkaConfiguration()
 	topicConfig := confManager.GetKafkaTopicConfiguration()
 	//Setting Kafka Client
-	handler.SetKafkaClient(*kafkaConfig, *topicConfig)
+	kafkaClient := handler.SetKafkaClient(*kafkaConfig, *topicConfig)
+	kafkaClient.SetProducer()
+
 	//Getting Order Service that will be used at handler methods.
 	orderService := handler.GetOrderService()
 	orderController := controller.GetOrderController(orderService)

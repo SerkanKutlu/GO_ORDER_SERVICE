@@ -44,7 +44,8 @@ func SetHttpClient(remoteServers config.RemoteServicesConfig) {
 	orderService.HttpClient.ServiceUrlMap[remoteServers.CustomerService.Name] = remoteServers.CustomerService.BaseUrl
 }
 
-func SetKafkaClient(kafkaConfig config.KafkaConfig, topicConfig config.TopicConfig) {
+func SetKafkaClient(kafkaConfig config.KafkaConfig, topicConfig config.TopicConfig) *kafkaPkg.Client {
 	orderService.KafkaClient = new(kafkaPkg.Client)
 	orderService.KafkaClient = kafkaPkg.NewKafkaClient(kafkaConfig, &topicConfig)
+	return orderService.KafkaClient
 }

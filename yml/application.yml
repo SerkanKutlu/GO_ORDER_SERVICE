@@ -12,11 +12,7 @@ dev:
     collection : {"Order" : "NewOrders" , "Product": "NewProducts"}
   kafka:
     producerConfig:
-      bootstrap.Servers: pkc-6ojv2.us-west4.gcp.confluent.cloud:9092
-      security.protocol: SASL_SSL
-      sasl.mechanisms: PLAIN
-      sasl.username: 76FIQJWEIZNK6KOB
-      sasl.password: KL3Nb9CaGum9fFXjguM1JgVRSO9AQ3CzY8sBWlO5e1lhfzIUDx+T0pb9DkkzYaNO
+      bootstrap.Servers: localhost:9092
     consumerConfig:
       bootstrap.Servers: pkc-6ojv2.us-west4.gcp.confluent.cloud:9092
       security.protocol: SASL_SSL

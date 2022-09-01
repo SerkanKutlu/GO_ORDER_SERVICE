@@ -12,7 +12,14 @@ type Client struct {
 	ConsumerConfig kafka.ConfigMap
 	TopicConfig    *config.TopicConfig
 	Producer       *kafka.Producer
-	Consumer       *[]kafka.Consumer
+	Consumers      *[]KafkaConsumer
+}
+
+type KafkaConsumeMethod func(message *kafka.Message) error
+type KafkaConsumer struct {
+	Name          string
+	Consumer      *kafka.Consumer
+	ConsumeMethod KafkaConsumeMethod
 }
 
 func NewKafkaClient(kafkaConfig config.KafkaConfig, kafkaTopicConfig *config.TopicConfig) *Client {
@@ -28,15 +35,16 @@ func NewKafkaClient(kafkaConfig config.KafkaConfig, kafkaTopicConfig *config.Top
 	for key, value := range kafkaConfig.ConsumerConfig {
 		client.ConsumerConfig[key] = value
 	}
+
+	return client
+}
+func (client *Client) SetProducer() {
 	producer, err := client.CreateProducer()
 	if err != nil {
 		panic(err)
 	}
 	client.Producer = producer
-	return client
-
 }
-
 func (client *Client) CreateProducer() (*kafka.Producer, *customerror.CustomError) {
 	producer, err := kafka.NewProducer(&client.ProducerConfig)
 	if err != nil {

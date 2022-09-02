@@ -12,13 +12,15 @@ func (ms *MongoService) FindOrdersOfCustomer(customerId string) (*[]model.Order,
 	filter := bson.M{"customerId": customerId}
 	cursor, err := ms.Orders.Find(context.Background(), filter)
 	if err != nil {
-		return nil, customerror.InternalServerError
+		ce := customerror.NewError(err.Error(), 500)
+		return nil, ce
 	}
 	var orders []model.Order
 	var order model.Order
 	for cursor.Next(context.Background()) {
 		if err = cursor.Decode(&order); err != nil {
-			return nil, customerror.InternalServerError
+			ce := customerror.NewError(err.Error(), 500)
+			return nil, ce
 		}
 		orders = append(orders, order)
 	}
@@ -33,7 +35,8 @@ func (ms *MongoService) UpdateStatusFieldOrder(id string, newStatus string) *cus
 	}
 	result, err := ms.Orders.UpdateOne(context.Background(), filter, updateCommand)
 	if err != nil {
-		return customerror.InternalServerError
+		ce := customerror.NewError(err.Error(), 500)
+		return ce
 	}
 	if result.ModifiedCount == 0 {
 		return customerror.NotFoundError
@@ -44,7 +47,8 @@ func (ms *MongoService) UpdateStatusFieldOrder(id string, newStatus string) *cus
 func (ms *MongoService) DeleteOrdersOfCustomer(customerId string) *customerror.CustomError {
 	result, err := ms.Orders.DeleteMany(context.TODO(), bson.M{"customerId": customerId})
 	if err != nil {
-		return customerror.InternalServerError
+		ce := customerror.NewError(err.Error(), 500)
+		return ce
 	}
 	if result.DeletedCount == 0 {
 		return customerror.NotFoundError

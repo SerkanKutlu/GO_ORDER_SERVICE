@@ -2,6 +2,7 @@ package kafkaPkg
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/SerkanKutlu/orderService/customerror"
 	"github.com/SerkanKutlu/orderService/events"
 	"github.com/confluentinc/confluent-kafka-go/kafka"
@@ -46,4 +47,30 @@ func (client *Client) PublishAtUpdate(message *events.OrderUpdated) *customerror
 		return customerror.NewError(err, 500)
 	}
 	return nil
+}
+func (client *Client) PublishLargeFile(message any) *customerror.CustomError {
+	deliveryChan := make(chan kafka.Event)
+	topicPartition := &kafka.TopicPartition{
+		Topic:     &client.TopicConfig.OrderKafka.OrderUpdated.Topic,
+		Partition: kafka.PartitionAny,
+	}
+	messageBytes, err := json.Marshal(message)
+	if err != nil {
+		return customerror.NewError(err, 500)
+	}
+	kafkaMessage := &kafka.Message{
+		TopicPartition: *topicPartition,
+		Value:          messageBytes,
+	}
+	fmt.Println("kafka yolcusu")
+	err = client.Producer.Produce(kafkaMessage, deliveryChan)
+	fmt.Println("kafkalandi i")
+	if err != nil {
+		fmt.Println("hayır")
+		fmt.Println(err.Error())
+		return customerror.NewError(err, 500)
+	}
+	fmt.Println("evet")
+	return nil
+
 }

@@ -1,7 +1,6 @@
 package kafkaPkg
 
 import (
-	"fmt"
 	"github.com/SerkanKutlu/orderService/config"
 	"github.com/SerkanKutlu/orderService/customerror"
 	"github.com/confluentinc/confluent-kafka-go/kafka"
@@ -28,14 +27,16 @@ func NewKafkaClient(kafkaConfig config.KafkaConfig, kafkaTopicConfig *config.Top
 	client.ProducerConfig = make(map[string]kafka.ConfigValue)
 	client.ConsumerConfig = make(map[string]kafka.ConfigValue)
 	for key, value := range kafkaConfig.ProducerConfig {
-		fmt.Println(key)
-		fmt.Println(value)
 		client.ProducerConfig[key] = value
 	}
 	for key, value := range kafkaConfig.ConsumerConfig {
 		client.ConsumerConfig[key] = value
 	}
-
+	client.ConsumerConfig["go.events.channel.size"] = 1
+	client.ConsumerConfig["go.consume.channel.size"] = 1
+	client.ProducerConfig["go.events.channel.size"] = 1
+	client.ProducerConfig["go.produce.channel.size"] = 1
+	//1297640
 	return client
 }
 func (client *Client) SetProducer() {
@@ -48,14 +49,11 @@ func (client *Client) SetProducer() {
 func (client *Client) CreateProducer() (*kafka.Producer, *customerror.CustomError) {
 	producer, err := kafka.NewProducer(&client.ProducerConfig)
 	if err != nil {
-		fmt.Println("error at create producer")
-		fmt.Println(err.Error())
 		customError := customerror.NewError(err.Error(), 500)
 		return nil, customError
 	}
 	return producer, nil
 }
-
 func (client *Client) CreateConsumer(topicName string) (*kafka.Consumer, *customerror.CustomError) {
 	consumer, err := kafka.NewConsumer(&client.ConsumerConfig)
 	if err != nil {

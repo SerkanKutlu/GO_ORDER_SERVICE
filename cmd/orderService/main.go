@@ -52,6 +52,7 @@ func main() {
 	e.PUT("/api/order/status/:id/:status", orderController.PutOrderStatus)
 	e.DELETE("/api/order/:id", orderController.DeleteOrder)
 	e.DELETE("/api/order/customer/:id", orderController.DeleteOrdersOfCustomer)
+	e.POST("/xxx", orderController.Deneme)
 	//Product Controls
 	e.GET("/api/product", productController.GetAllProducts)
 	e.DELETE("/api/product/:id", productController.DeleteProduct)

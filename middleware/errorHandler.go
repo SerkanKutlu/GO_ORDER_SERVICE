@@ -9,8 +9,14 @@ func ErrorHandler(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		defer func() {
 			if err := recover(); err != nil {
-				customError := customerror.NewError(err, 500)
-				_ = c.JSON(customError.StatusCode, customError)
+				switch err.(type) {
+				case *customerror.CustomError:
+					ce := err.(*customerror.CustomError)
+					_ = c.JSON(ce.StatusCode, ce)
+				default:
+					ce := customerror.NewError(err, 500)
+					_ = c.JSON(ce.StatusCode, ce)
+				}
 			}
 		}()
 		return next(c)

@@ -24,13 +24,15 @@ type GenericRepository struct {
 func (gc *GenericCollection[T]) FindAll() (*[]T, *customerror.CustomError) {
 	cursor, err := gc.Collection.Find(context.Background(), bson.M{})
 	if err != nil {
-		return nil, customerror.InternalServerError
+		ce := customerror.NewError(err.Error(), 500)
+		return nil, ce
 	}
 	var entities []T
 	var entity T
 	for cursor.Next(context.Background()) {
 		if err = cursor.Decode(&entity); err != nil {
-			return nil, customerror.InternalServerError
+			ce := customerror.NewError(err.Error(), 500)
+			return nil, ce
 		}
 		entities = append(entities, entity)
 	}
@@ -39,23 +41,31 @@ func (gc *GenericCollection[T]) FindAll() (*[]T, *customerror.CustomError) {
 func (gc *GenericCollection[T]) FindById(id string) (*T, *customerror.CustomError) {
 	filter := bson.M{"_id": id}
 	var entity T
-	err := gc.Collection.FindOne(context.Background(), filter).Decode(&entity)
+	foundEntity := gc.Collection.FindOne(context.Background(), filter)
+	if foundEntity.Err() != nil {
+		ce := customerror.NotFoundError
+		panic(ce) //This custom error will be handled by middleware
+	}
+	err := foundEntity.Decode(&entity)
 	if err != nil {
-		return nil, customerror.NotFoundError
+		ce := customerror.NewError("Found a invalid entity at the database. Decode Error.", 500)
+		panic(ce) //This custom error will be handled by middleware
 	}
 	return &entity, nil
 }
 func (gc *GenericCollection[T]) Insert(entity *T) *customerror.CustomError {
 	_, err := gc.Collection.InsertOne(context.Background(), entity)
 	if err != nil {
-		return customerror.InternalServerError
+		ce := customerror.NewError(err.Error(), 500)
+		return ce
 	}
 	return nil
 }
 func (gc *GenericCollection[T]) Update(entity *T, entityId string) *customerror.CustomError {
 	result, err := gc.Collection.ReplaceOne(context.Background(), bson.M{"_id": entityId}, entity)
 	if err != nil {
-		return customerror.InternalServerError
+		ce := customerror.NewError(err.Error(), 500)
+		return ce
 	}
 	if result.MatchedCount == 0 {
 		return customerror.NotFoundError
@@ -65,7 +75,8 @@ func (gc *GenericCollection[T]) Update(entity *T, entityId string) *customerror.
 func (gc *GenericCollection[T]) Delete(id string) *customerror.CustomError {
 	result, err := gc.Collection.DeleteOne(context.TODO(), bson.M{"_id": id})
 	if err != nil {
-		return customerror.InternalServerError
+		ce := customerror.NewError(err.Error(), 500)
+		return ce
 	}
 	if result.DeletedCount == 0 {
 		return customerror.NotFoundError

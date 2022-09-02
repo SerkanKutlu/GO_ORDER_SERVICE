@@ -32,10 +32,6 @@ func NewKafkaClient(kafkaConfig config.KafkaConfig, kafkaTopicConfig *config.Top
 	for key, value := range kafkaConfig.ConsumerConfig {
 		client.ConsumerConfig[key] = value
 	}
-	client.ConsumerConfig["go.events.channel.size"] = 1
-	client.ConsumerConfig["go.consume.channel.size"] = 1
-	client.ProducerConfig["go.events.channel.size"] = 1
-	client.ProducerConfig["go.produce.channel.size"] = 1
 	//1297640
 	return client
 }

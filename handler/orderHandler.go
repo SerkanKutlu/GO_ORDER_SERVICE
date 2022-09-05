@@ -166,7 +166,3 @@ func (ds *OrderService) DeleteOrdersOfCustomer(customerId string) *customerror.C
 	return nil
 
 }
-func (ds *OrderService) DenemeService(message any) *customerror.CustomError {
-	fmt.Println("service ici")
-	return ds.KafkaClient.PublishLargeFile(message)
-}

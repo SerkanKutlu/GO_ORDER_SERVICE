@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/SerkanKutlu/orderService/config"
 	"github.com/SerkanKutlu/orderService/controller"
 	"github.com/SerkanKutlu/orderService/handler"
@@ -39,6 +40,8 @@ func main() {
 
 	//Getting Order Service that will be used at handler methods.
 	orderService := handler.GetOrderService()
+	fmt.Println("NAME")
+	fmt.Println(orderService.MongoService.Orders.Name())
 	orderController := controller.GetOrderController(orderService)
 	productController := controller.GetProductController(orderService)
 	e := echo.New()
@@ -52,7 +55,6 @@ func main() {
 	e.PUT("/api/order/status/:id/:status", orderController.PutOrderStatus)
 	e.DELETE("/api/order/:id", orderController.DeleteOrder)
 	e.DELETE("/api/order/customer/:id", orderController.DeleteOrdersOfCustomer)
-	e.POST("/xxx", orderController.Deneme)
 	//Product Controls
 	e.GET("/api/product", productController.GetAllProducts)
 	e.DELETE("/api/product/:id", productController.DeleteProduct)

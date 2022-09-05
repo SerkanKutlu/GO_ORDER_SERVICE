@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"fmt"
 	"github.com/SerkanKutlu/orderService/customerror"
 	"github.com/SerkanKutlu/orderService/dto"
 	"github.com/SerkanKutlu/orderService/handler"
@@ -14,7 +13,6 @@ type OrderController struct {
 
 func GetOrderController(orderService *handler.OrderService) *OrderController {
 	return &OrderController{Controller: &Controller{OrderService: orderService}}
-
 }
 
 func (controller *OrderController) GetAllOrders(c echo.Context) error {
@@ -90,17 +88,4 @@ func (controller *OrderController) DeleteOrdersOfCustomer(c echo.Context) error 
 		return c.JSON(err.StatusCode, err)
 	}
 	return c.JSON(200, "")
-}
-func (controller *OrderController) Deneme(c echo.Context) error {
-	file, err := c.FormFile("deneme.pdf")
-	if err != nil {
-		fmt.Println("error kardes")
-	}
-	fmt.Println(file.Size)
-	err2 := controller.Controller.OrderService.DenemeService(file)
-	if err2 != nil {
-		return c.JSON(err2.StatusCode, err2)
-	}
-	return c.JSON(200, "success")
-
 }

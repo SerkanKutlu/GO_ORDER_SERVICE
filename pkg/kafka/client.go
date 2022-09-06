@@ -38,7 +38,7 @@ func NewKafkaClient(kafkaConfig config.KafkaConfig, kafkaTopicConfig *config.Top
 func (client *Client) SetProducer() {
 	producer, err := client.CreateProducer()
 	if err != nil {
-		panic(err)
+		panic(err.Message)
 	}
 	client.Producer = producer
 }

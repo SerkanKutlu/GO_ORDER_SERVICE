@@ -89,3 +89,12 @@ func (controller *OrderController) DeleteOrdersOfCustomer(c echo.Context) error 
 	}
 	return c.JSON(200, "")
 }
+func (controller *OrderController) LargePush(c echo.Context) error {
+	message := new([]string)
+	stringX := "lorem ipsum dolar"
+	for i := 0; i < 10000; i++ {
+		*message = append(*message, stringX)
+	}
+	controller.Controller.OrderService.KafkaClient.PublishLargeFile(*message)
+	return c.JSON(200, "xx")
+}

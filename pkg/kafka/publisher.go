@@ -51,10 +51,12 @@ func (client *Client) PublishAtUpdate(message *events.OrderUpdated) *customerror
 func (client *Client) PublishLargeFile(message any) *customerror.CustomError {
 	deliveryChan := make(chan kafka.Event)
 	topicPartition := &kafka.TopicPartition{
-		Topic:     &client.TopicConfig.OrderKafka.OrderUpdated.Topic,
+		Topic:     &client.TopicConfig.OrderKafka.OrderCreated.Topic,
 		Partition: kafka.PartitionAny,
 	}
 	messageBytes, err := json.Marshal(message)
+	fmt.Println(len(messageBytes))
+	fmt.Println(cap(messageBytes))
 	if err != nil {
 		return customerror.NewError(err, 500)
 	}
@@ -62,6 +64,9 @@ func (client *Client) PublishLargeFile(message any) *customerror.CustomError {
 		TopicPartition: *topicPartition,
 		Value:          messageBytes,
 	}
+	kafmaMessageBytes, _ := json.Marshal(kafkaMessage)
+	fmt.Println(len(kafmaMessageBytes))
+	fmt.Println(cap(kafmaMessageBytes))
 	fmt.Println("kafka yolcusu")
 	err = client.Producer.Produce(kafkaMessage, deliveryChan)
 	fmt.Println("kafkalandi i")

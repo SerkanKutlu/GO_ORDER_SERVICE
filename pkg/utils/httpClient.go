@@ -14,11 +14,6 @@ type HttpClient struct {
 }
 
 func (hc *HttpClient) GetCustomerAddress(customerId string) (*model.Address, *customerror.CustomError) {
-	for key, value := range hc.ServiceUrlMap {
-		fmt.Println("printing")
-		fmt.Println(key)
-		fmt.Println(value)
-	}
 	url := fmt.Sprintf("%s%s%s", hc.ServiceUrlMap["CustomerService"], "customers/", customerId)
 	fmt.Println(url)
 	resp, err := http.Get(url)

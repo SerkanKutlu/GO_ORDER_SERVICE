@@ -13,7 +13,7 @@ import (
 func main() {
 	//env := os.Getenv("GO_ENV")
 	env := "dev"
-	confManager := config.NewConfigurationManager("../../yml", "application", env)
+	confManager := config.NewConfigurationManager("yml", "application", env)
 	//Getting Mongo Configurations
 	mongoConfig := confManager.GetMongoConfiguration()
 	//Getting Mongo Service
@@ -37,6 +37,9 @@ func main() {
 	//Setting Kafka Client
 	kafkaClient := handler.SetKafkaClient(*kafkaConfig, *topicConfig)
 	kafkaClient.SetProducer()
+
+	//Setting redis client
+	handler.SetRedisClient(confManager.GetRedisConfiguration())
 
 	//Getting Order Service that will be used at handler methods.
 	orderService := handler.GetOrderService()

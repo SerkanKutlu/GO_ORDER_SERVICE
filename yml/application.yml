@@ -17,10 +17,10 @@ dev:
       sasl.mechanisms: PLAIN
       sasl.username: OV5JWHPDABXM6ULA
       sasl.password: hJMrMLFpri87uVgxVWfBeR7fCu+pNGIq/qTkEsrRDN2VB++I8VBKv2kkWAhQfz4g
-      message.max.bytes: 1000
+      compression.type: gzip
   orderKafka:
     orderCreated:
-      topic: "orderCreatedTopic"
+      topic: "orderCreated"
     orderUpdated:
       topic: "orderUpdatedTopic"
   order:
@@ -37,3 +37,7 @@ dev:
   customerService:
     name : "CustomerService"
     baseUrl: "http://localhost:5000/"
+  redis:
+    connectionString: localhost:6379
+    channel: goChannel
+    retryChannel: goRetryChannel

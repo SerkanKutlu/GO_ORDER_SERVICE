@@ -4,6 +4,7 @@ type ApplicationConfig struct {
 	Rabbit RabbitConfig `yaml:"rabbit"`
 	Mongo  MongoConfig  `yaml:"mongo"`
 	Kafka  KafkaConfig  `yaml:"kafka"`
+	Redis  RedisConfig  `yaml:"redis"`
 }
 type RabbitConfig struct {
 	Host           string `yaml:"host"`
@@ -23,4 +24,10 @@ type MongoConfig struct {
 type KafkaConfig struct {
 	ProducerConfig map[string]string `yaml:"producerConfig"`
 	ConsumerConfig map[string]string `yaml:"consumerConfig"`
+}
+
+type RedisConfig struct {
+	ConnectionString string `yaml:"connectionString"`
+	Channel          string `yaml:"channel"`
+	RetryChannel     string `yaml:"retryChannel"`
 }

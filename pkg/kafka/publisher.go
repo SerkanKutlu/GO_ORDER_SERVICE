@@ -22,6 +22,9 @@ func (client *Client) PublishAtCreation(message *events.OrderCreated) *customerr
 		TopicPartition: *topicPartition,
 		Value:          messageBytes,
 	}
+	fmt.Println("kafka message size")
+	x, _ := json.Marshal(kafkaMessage)
+	fmt.Println(len(x))
 	err = client.Producer.Produce(kafkaMessage, deliveryChan)
 	if err != nil {
 		return customerror.NewError(err, 500)

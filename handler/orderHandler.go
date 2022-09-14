@@ -45,31 +45,31 @@ func (ds *OrderService) PostOrder(orderDto *dto.OrderForCreationDto) (*string, *
 	newOrder := orderDto.ToOrder()
 	fmt.Println("post3")
 	//CustomerCheck and Address assignment
-	address, err := ds.HttpClient.GetCustomerAddress(newOrder.CustomerId)
-	fmt.Println("post4")
-	if err != nil {
-		fmt.Println("http de patladi")
-		return nil, err
-	}
-	newOrder.Address = *address
+	//address, err := ds.HttpClient.GetCustomerAddress(newOrder.CustomerId)
+	//fmt.Println("post4")
+	//if err != nil {
+	//	fmt.Println("http de patladi")
+	//	return nil, err
+	//}
+	//newOrder.Address = *address
 
 	//Product Check, Calculate total and quantity
-	var total float32
-	for _, p := range newOrder.ProductIds {
-		product, err := ds.GenericRepository.GenericProduct.FindById(p)
-		if err != nil {
-			customErr := customerror.NewError("Product with id: "+p+" not found", 404)
-			return nil, customErr
-		}
-		total += product.Price
-	}
-	newOrder.Total = total
-	newOrder.Quantity = len(newOrder.ProductIds)
+	//var total float32
+	//for _, p := range newOrder.ProductIds {
+	//	product, err := ds.GenericRepository.GenericProduct.FindById(p)
+	//	if err != nil {
+	//		customErr := customerror.NewError("Product with id: "+p+" not found", 404)
+	//		return nil, customErr
+	//	}
+	//	total += product.Price
+	//}
+	//newOrder.Total = total
+	//newOrder.Quantity = len(newOrder.ProductIds)
 
 	//Insert to db
-	if err := ds.GenericRepository.GenericOrder.Insert(newOrder); err != nil {
-		return nil, err
-	}
+	////if err := ds.GenericRepository.GenericOrder.Insert(newOrder); err != nil {
+	//	return nil, err
+	//}
 
 	//Publish to rabbit
 	fmt.Println("rabbite gidiyor")
@@ -78,13 +78,19 @@ func (ds *OrderService) PostOrder(orderDto *dto.OrderForCreationDto) (*string, *
 	if err := ds.RabbitClient.PublishAtCreated(event); err != nil {
 		return nil, err
 	}
-
+	//Publish to kafka
 	fmt.Println("kafkaya gidiyor")
 	//Publish to kafka
 	if err := ds.KafkaClient.PublishAtCreation(event); err != nil {
 		fmt.Println("kafkada sorun var")
 		return nil, err
 	}
+	//Publish to redis
+	if err := ds.RedisClient.PublishMain(event); err != nil {
+		fmt.Println("rediste sorun var")
+		return nil, err
+	}
+	fmt.Println("redis gitti")
 	//Return
 	return &newOrder.Id, nil
 

@@ -37,6 +37,10 @@ func (cm *configurationManager) GetMongoConfiguration() *MongoConfig {
 	return &cm.applicationConfig.Mongo
 }
 
+func (cm *configurationManager) GetRedisConfiguration() *RedisConfig {
+	return &cm.applicationConfig.Redis
+}
+
 func (cm *configurationManager) GetQueuesConfiguration() *QueueConfig {
 	return cm.queuesConfig
 }
@@ -51,7 +55,7 @@ func readApplicationConfigFile(env string, file string) *ApplicationConfig {
 
 	viper.SetConfigName(file)
 	if err := viper.ReadInConfig(); err != nil {
-		panic("Can not load application config file 1")
+		panic(err.Error())
 	}
 	var appConfig ApplicationConfig
 	envSub := viper.Sub(env)
@@ -63,7 +67,7 @@ func readApplicationConfigFile(env string, file string) *ApplicationConfig {
 func readQueuesConfigFile(env string, file string) *QueueConfig {
 	viper.SetConfigName(file)
 	if err := viper.ReadInConfig(); err != nil {
-		panic("Can not load application config file")
+		panic(err.Error())
 	}
 	var queueConfig QueueConfig
 	envSub := viper.Sub(env)
@@ -75,7 +79,7 @@ func readQueuesConfigFile(env string, file string) *QueueConfig {
 func readRemoteServicesConfigFile(env string, file string) *RemoteServicesConfig {
 	viper.SetConfigName(file)
 	if err := viper.ReadInConfig(); err != nil {
-		panic("Can not load application config file")
+		panic(err.Error())
 	}
 	var remoteConfig RemoteServicesConfig
 	envSub := viper.Sub(env)
@@ -87,7 +91,7 @@ func readRemoteServicesConfigFile(env string, file string) *RemoteServicesConfig
 func readKafkaTopicsConfigFile(env string, file string) *TopicConfig {
 	viper.SetConfigName(file)
 	if err := viper.ReadInConfig(); err != nil {
-		panic("Can not load application config file")
+		panic(err.Error())
 	}
 	var topicConfig TopicConfig
 	envSub := viper.Sub(env)

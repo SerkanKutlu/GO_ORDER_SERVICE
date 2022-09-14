@@ -5,6 +5,7 @@ import (
 	"github.com/SerkanKutlu/orderService/model"
 	"github.com/SerkanKutlu/orderService/pkg/kafka"
 	"github.com/SerkanKutlu/orderService/pkg/rabbit"
+	redisPkg "github.com/SerkanKutlu/orderService/pkg/redis"
 	"github.com/SerkanKutlu/orderService/pkg/utils"
 	"github.com/SerkanKutlu/orderService/repository/mongodb"
 )
@@ -15,6 +16,7 @@ type OrderService struct {
 	GenericRepository *mongodb.GenericRepository
 	HttpClient        *utils.HttpClient
 	KafkaClient       *kafkaPkg.Client
+	RedisClient       *redisPkg.Client
 }
 
 var orderService = new(OrderService)
@@ -48,4 +50,9 @@ func SetKafkaClient(kafkaConfig config.KafkaConfig, topicConfig config.TopicConf
 	orderService.KafkaClient = new(kafkaPkg.Client)
 	orderService.KafkaClient = kafkaPkg.NewKafkaClient(kafkaConfig, &topicConfig)
 	return orderService.KafkaClient
+}
+
+func SetRedisClient(redisConfig *config.RedisConfig) {
+	orderService.RedisClient = new(redisPkg.Client)
+	orderService.RedisClient = redisPkg.NewRedisClient(redisConfig)
 }

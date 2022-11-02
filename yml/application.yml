@@ -7,7 +7,50 @@ dev:
     username : "guest"
     password : "guest"
   mongo:
-    connectionString : "mongodb://root:155202Asd...@localhost:27017"
+    connectionString : "mongodb://localhost:27017"
+    database :  "BoilerPlate"
+    collection : {"Order" : "Orders" , "Product": "NewProducts"}
+  kafka:
+    producerConfig:
+      bootstrap.Servers: pkc-6ojv2.us-west4.gcp.confluent.cloud:9092
+      security.protocol: SASL_SSL
+      sasl.mechanisms: PLAIN
+      sasl.username: XKCMALEJMFRDRYY3
+      sasl.password: VzY1KJKu7T/B9G+Apjao9yXsgt5MctjhLGAlXaAqA1JwDsQ5tRhFndslTOFcPFBB
+      compression.type: gzip
+  orderKafka:
+    orderCreated:
+      topic: "orderCreated"
+    orderUpdated:
+      topic: "orderUpdatedTopic"
+  order:
+    orderCreated:
+      exchange: "orderExchange"
+      exchangeType: "topic"
+      routingKey: "order.created"
+      queue: "orderCreatedQueue"
+    orderUpdated:
+      exchange: "orderExchange"
+      exchangeType: "topic"
+      routingKey: "order.updated"
+      queue: "orderUpdatedQueue"
+  customerService:
+    name : "CustomerService"
+    baseUrl: "http://localhost:5005/"
+  redis:
+    connectionString: localhost:6379
+    channel: goChannel
+    retryChannel: goRetryChannel
+docker:
+  rabbit:
+    host: "rabbitmq"
+    port: 5672
+    virtualHost: "/"
+    connectionName : "go publisher"
+    username : "guest"
+    password : "guest"
+  mongo:
+    connectionString : "mongodb://root:155202Asd...@mongodb:27017"
     database :  "GoUsersDb"
     collection : {"Order" : "NewOrders" , "Product": "NewProducts"}
   kafka:
@@ -36,8 +79,8 @@ dev:
       queue: "orderUpdatedQueue"
   customerService:
     name : "CustomerService"
-    baseUrl: "http://localhost:5000/"
+    baseUrl: "http://gateway:5005/"
   redis:
-    connectionString: localhost:6379
+    connectionString: redis:6379
     channel: goChannel
     retryChannel: goRetryChannel

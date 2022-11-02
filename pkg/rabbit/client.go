@@ -44,7 +44,7 @@ func (client *Client) ReConnect() *customerror.CustomError {
 	return nil
 }
 
-//Creating channel, declare queues and exchanges, binding.
+// Creating channel, declare queues and exchanges, binding.
 func (client *Client) setAllConfigurations() {
 	queues := client.GetRegisteredQueues()
 	for _, queue := range *queues {
@@ -98,7 +98,6 @@ func (client *Client) createConnection(rabbitConfig config.RabbitConfig) (*amqp.
 		client.ErrorChannel <- errors.New("rabbit connection is down")
 	}()
 
-	fmt.Println("Rabbit connection is done")
 	return connection, nil
 }
 

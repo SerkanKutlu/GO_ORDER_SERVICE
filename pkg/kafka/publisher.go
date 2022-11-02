@@ -2,7 +2,6 @@ package kafkaPkg
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/SerkanKutlu/orderService/customerror"
 	"github.com/SerkanKutlu/orderService/events"
 	"github.com/confluentinc/confluent-kafka-go/kafka"
@@ -22,9 +21,6 @@ func (client *Client) PublishAtCreation(message *events.OrderCreated) *customerr
 		TopicPartition: *topicPartition,
 		Value:          messageBytes,
 	}
-	fmt.Println("kafka message size")
-	x, _ := json.Marshal(kafkaMessage)
-	fmt.Println(len(x))
 	err = client.Producer.Produce(kafkaMessage, deliveryChan)
 	if err != nil {
 		return customerror.NewError(err, 500)
@@ -58,8 +54,6 @@ func (client *Client) PublishLargeFile(message any) *customerror.CustomError {
 		Partition: kafka.PartitionAny,
 	}
 	messageBytes, err := json.Marshal(message)
-	fmt.Println(len(messageBytes))
-	fmt.Println(cap(messageBytes))
 	if err != nil {
 		return customerror.NewError(err, 500)
 	}
@@ -67,18 +61,47 @@ func (client *Client) PublishLargeFile(message any) *customerror.CustomError {
 		TopicPartition: *topicPartition,
 		Value:          messageBytes,
 	}
-	kafmaMessageBytes, _ := json.Marshal(kafkaMessage)
-	fmt.Println(len(kafmaMessageBytes))
-	fmt.Println(cap(kafmaMessageBytes))
-	fmt.Println("kafka yolcusu")
 	err = client.Producer.Produce(kafkaMessage, deliveryChan)
-	fmt.Println("kafkalandi i")
 	if err != nil {
-		fmt.Println("hayır")
-		fmt.Println(err.Error())
 		return customerror.NewError(err, 500)
 	}
-	fmt.Println("evet")
 	return nil
 
+}
+func (client *Client) Publish(message *[]byte, partitionNumber int32, pkgName string, isEnd bool) {
+	deliveryChan := make(chan kafka.Event, 10000)
+	topic := "bigDataHere"
+	topicPartition := &kafka.TopicPartition{
+		Topic:     &topic,
+		Partition: partitionNumber,
+	}
+	kafkaMessage := &kafka.Message{
+		TopicPartition: *topicPartition,
+		Value:          *message,
+	}
+
+	if isEnd == true {
+		AddHeaderToMessage(kafkaMessage, "pkgName", pkgName+"end")
+	} else {
+		AddHeaderToMessage(kafkaMessage, "pkgName", pkgName)
+	}
+	err := client.Producer.Produce(kafkaMessage, deliveryChan)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func AddHeaderToMessage(message *kafka.Message, headerKey string, headerValue string) {
+	newHeader := kafka.Header{
+		Key:   headerKey,
+		Value: []byte(headerValue),
+	}
+	//If already exist header
+	for index, header := range message.Headers {
+		if header.Key == headerKey {
+			message.Headers[index] = newHeader
+			return
+		}
+	}
+	message.Headers = append(message.Headers, newHeader)
 }

@@ -15,10 +15,8 @@ type HttpClient struct {
 
 func (hc *HttpClient) GetCustomerAddress(customerId string) (*model.Address, *customerror.CustomError) {
 	url := fmt.Sprintf("%s%s%s", hc.ServiceUrlMap["CustomerService"], "customers/", customerId)
-	fmt.Println(url)
 	resp, err := http.Get(url)
 	if resp == nil {
-		fmt.Println(err.Error())
 		return nil, customerror.InternalServerError
 	}
 	if resp.StatusCode == 404 {

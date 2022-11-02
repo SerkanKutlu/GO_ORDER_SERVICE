@@ -3,7 +3,6 @@ package rabbit
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"github.com/SerkanKutlu/orderService/customerror"
 	"github.com/SerkanKutlu/orderService/events"
 	amqp "github.com/rabbitmq/amqp091-go"
@@ -44,7 +43,6 @@ func (client *Client) PublishAtUpdated(message *events.OrderUpdated) *customerro
 func (client *Client) EnsureConnection() {
 	go func() {
 		<-client.ErrorChannel
-		fmt.Println("Retrying to connect rabbit mq")
 		connectionError := customerror.InternalServerError
 		for connectionError != nil {
 			connectionError = client.ReConnect()

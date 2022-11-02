@@ -2,7 +2,6 @@ package mongodb
 
 import (
 	"context"
-	"fmt"
 	"github.com/SerkanKutlu/orderService/config"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -28,8 +27,6 @@ func GetMongoService(mongoConfig *config.MongoConfig) *MongoService {
 		panic(err)
 	}
 	database := client.Database(mongoConfig.Database)
-	fmt.Println("DATABASE")
-	fmt.Println(database.WriteConcern())
 	productCollection := database.Collection(mongoConfig.Collection["product"])
 	orderCollection := database.Collection(mongoConfig.Collection["order"])
 	service := MongoService{

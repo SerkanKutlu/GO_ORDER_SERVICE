@@ -1,17 +1,16 @@
 package main
 
 import (
-	"fmt"
 	"github.com/SerkanKutlu/orderService/config"
 	"github.com/SerkanKutlu/orderService/controller"
 	"github.com/SerkanKutlu/orderService/handler"
 	"github.com/SerkanKutlu/orderService/middleware"
 	"github.com/SerkanKutlu/orderService/repository/mongodb"
 	"github.com/labstack/echo/v4"
+	_ "net/http/pprof"
 )
 
 func main() {
-	//env := os.Getenv("GO_ENV")
 	env := "dev"
 	confManager := config.NewConfigurationManager("yml", "application", env)
 	//Getting Mongo Configurations
@@ -37,14 +36,12 @@ func main() {
 	//Setting Kafka Client
 	kafkaClient := handler.SetKafkaClient(*kafkaConfig, *topicConfig)
 	kafkaClient.SetProducer()
-
+	//kafkaClient.PublishBigMessage()
 	//Setting redis client
 	handler.SetRedisClient(confManager.GetRedisConfiguration())
 
 	//Getting Order Service that will be used at handler methods.
 	orderService := handler.GetOrderService()
-	fmt.Println("NAME")
-	fmt.Println(orderService.MongoService.Orders.Name())
 	orderController := controller.GetOrderController(orderService)
 	productController := controller.GetProductController(orderService)
 	e := echo.New()
@@ -65,7 +62,7 @@ func main() {
 	e.POST("/api/product", productController.PostProduct)
 	e.PUT("/api/product", productController.PutProduct)
 	e.GET("/api/order/large", orderController.LargePush)
-	err := e.Start(":9001")
+	err := e.Start(":4001")
 	if err != nil {
 		panic(err)
 	}
